@@ -1,0 +1,5 @@
+{
+  "desktop": { "count": 196, "width": 1920, "height": 1080, "fps": 18, "pattern": "/frames/desktop/frame_%04d.webp" },
+  "mobile":  { "count": 109, "width": 1080, "height": 1080, "fps": 10, "pattern": "/frames/mobile/frame_%04d.webp" },
+  "poster": "/frames/poster.webp"
+}

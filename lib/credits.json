@@ -1,1 +1,114 @@
-[]
+[
+ {
+  "name": "uyuni-mirror",
+  "title": "Uyuni Salt Lake (Salar de Uyuni), Bolivia, 12-2022",
+  "author": "Abel Maestro Garcia",
+  "license": "Public domain",
+  "source": "https://commons.wikimedia.org/wiki/File:Uyuni_Salt_Lake_(Salar_de_Uyuni),_Bolivia,_12-2022.jpg"
+ },
+ {
+  "name": "uyuni-cruiser",
+  "title": "Reflection on the Salar de Uyuni, bolivia",
+  "author": "Christopher Crouzet",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Reflection_on_the_Salar_de_Uyuni,_bolivia.jpg"
+ },
+ {
+  "name": "uyuni-sunset",
+  "title": "Salar de Uyuni, Bolivia, 2016-02-04, DD 25-27 HDR",
+  "author": "Diego Delso",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Salar_de_Uyuni,_Bolivia,_2016-02-04,_DD_25-27_HDR.JPG"
+ },
+ {
+  "name": "uyuni-island",
+  "title": "Salar de Uyuni, Bolivia, 2016-02-04, DD 10-12 HDR",
+  "author": "Diego Delso",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Salar_de_Uyuni,_Bolivia,_2016-02-04,_DD_10-12_HDR.JPG"
+ },
+ {
+  "name": "titicaca-sunset",
+  "title": "Atardecer en el lago Titicaca, Copacabana. Bolivia",
+  "author": "Patricia Salguero",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Atardecer_en_el_lago_Titicaca,_Copacabana._Bolivia.jpg"
+ },
+ {
+  "name": "titicaca-uros",
+  "title": "Die Uru Kultur auf dem Titicaca-Seeee",
+  "author": "5snake5",
+  "license": "CC0",
+  "source": "https://commons.wikimedia.org/wiki/File:Die_Uru_Kultur_auf_dem_Titicaca-Seeee.jpg"
+ },
+ {
+  "name": "titicaca-dawn",
+  "title": "Amanecer en el lago Titicaca, Puno, Perú, 2015-08-01, DD 01",
+  "author": "Diego Delso",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Amanecer_en_el_lago_Titicaca,_Puno,_Per%C3%BA,_2015-08-01,_DD_01.JPG"
+ },
+ {
+  "name": "titicaca-isla",
+  "title": "Lago Titicaca La Paz",
+  "author": "Luz Natalia Mercado Callau",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Lago_Titicaca_La_Paz.jpg"
+ },
+ {
+  "name": "vinicunca-ridge",
+  "title": "Montaña Arcoíris",
+  "author": "Jhonatan David Reategui Sifuentes",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Monta%C3%B1a_Arco%C3%ADris.jpg"
+ },
+ {
+  "name": "laguna-flamingos",
+  "title": "James's Flamingoes in Laguna Colorada, Bolivia",
+  "author": "Havardtl",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:James%27s_Flamingoes_in_Laguna_Colorada,_Bolivia.jpg"
+ },
+ {
+  "name": "laguna-colorada",
+  "title": "Laguna Colorada, Bolivia, 2016-02-02, DD 83-87 PAN",
+  "author": "Diego Delso",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Laguna_Colorada,_Bolivia,_2016-02-02,_DD_83-87_PAN.JPG"
+ },
+ {
+  "name": "cusco-plaza",
+  "title": "Iglesia de la Compañía de Jesús, Plaza de Armas, Cusco, Perú, 2015-07-31, DD 74",
+  "author": "Diego Delso",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Iglesia_de_la_Compa%C3%B1%C3%ADa_de_Jes%C3%BAs,_Plaza_de_Armas,_Cusco,_Per%C3%BA,_2015-07-31,_DD_74.JPG"
+ },
+ {
+  "name": "cusco-night",
+  "title": "Plaza de Armas - Cusco at night",
+  "author": "Jorge Castro Ruso",
+  "license": "CC BY-SA 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Plaza_de_Armas_-_Cusco_at_night.jpg"
+ },
+ {
+  "name": "machu-picchu",
+  "title": "Machu Picchu, Peru",
+  "author": "Unsplash photographer",
+  "license": "Unsplash License",
+  "source": "https://images.unsplash.com/photo-1526392060635-9d6019884377"
+ },
+ {
+  "name": "machu-picchu-terraces",
+  "title": "Machu Picchu, Peru",
+  "author": "Unsplash photographer",
+  "license": "Unsplash License",
+  "source": "https://images.unsplash.com/photo-1587595431973-160d0d94add1"
+ },
+ {
+  "name": "machu-picchu-golden",
+  "title": "Machu Picchu, Peru",
+  "author": "Unsplash photographer",
+  "license": "Unsplash License",
+  "source": "https://images.unsplash.com/photo-1531065208531-4036c0dba3ca"
+ }
+]

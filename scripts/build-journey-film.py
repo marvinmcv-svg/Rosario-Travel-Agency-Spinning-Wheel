@@ -96,7 +96,7 @@ def main() -> None:
 
     subprocess.run(
         ["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", os.path.join(tmp, "f_%05d.jpg"),
-         "-c:v", "libx264", "-preset", "slow", "-crf", "17", "-pix_fmt", "yuv420p", "-movflags", "+faststart", OUT],
+         "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p", "-movflags", "+faststart", OUT],
         check=True,
     )
     shutil.rmtree(tmp)

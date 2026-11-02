@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/* ───────────────────────────────────────────────────────────────
+   Rosario design tokens
+   Palette is drawn from the places themselves:
+   obsidian night sky · Uyuni salt · Andean copper · Titicaca teal
+   ─────────────────────────────────────────────────────────────── */
+@theme {
+  --color-ink: #0a0b0c;
+  --color-ink-2: #121416;
+  --color-ink-3: #1a1d20;
+  --color-salt: #f3efe7;
+  --color-salt-2: #e8e2d6;
+  --color-stone: #8f887c;
+  --color-copper: #c4703f;
+  --color-copper-2: #d98b5b;
+  --color-gold: #cfa968;
+  --color-lake: #1d4b57;
+  --color-lake-2: #2f6b78;
+  --color-line: rgb(243 239 231 / 0.14);
+
+  --font-display: var(--font-serif), "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-silk: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-marquee: marquee 40s linear infinite;
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-ink);
+  color: var(--color-salt);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+::selection { background: var(--color-copper); color: var(--color-ink); }
+
+/* Display type */
+.font-display { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.02em; }
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Split-text helpers: each line is a mask, each word/char slides up inside it */
+.split-line { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.split-word { display: inline-block; will-change: transform; }
+
+/* Film grain — gives photography a printed, editorial feel */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.5'/></svg>");
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  animation: grain 1.2s steps(6) infinite;
+}
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); }
+  80% { transform: translate(3%, 3%); }
+}
+
+/* Links with a drawn underline */
+.link-line { position: relative; }
+.link-line::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -2px; height: 1px;
+  background: currentColor;
+  transform: scaleX(0); transform-origin: right;
+  transition: transform 0.6s var(--ease-expo);
+}
+.link-line:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* Inputs */
+.field {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.85rem 0;
+  color: var(--color-salt);
+  outline: none;
+  transition: border-color 0.4s var(--ease-expo);
+  border-radius: 0;
+}
+.field:focus { border-color: var(--color-copper); }
+.field::placeholder { color: rgb(243 239 231 / 0.35); }
+select.field option { background: var(--color-ink-2); }
+
+/* Admin surfaces are light-on-dark but denser */
+.admin-card {
+  background: var(--color-ink-2);
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--color-ink); }
+::-webkit-scrollbar-thumb { background: #2a2e32; border-radius: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .grain::after { animation: none; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

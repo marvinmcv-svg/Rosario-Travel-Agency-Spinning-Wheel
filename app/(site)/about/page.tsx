@@ -29,7 +29,7 @@ export default function AboutPage() {
           <SplitReveal className="font-display text-5xl leading-[1]">It started on the salt.</SplitReveal>
           <FadeUp className="mt-6 space-y-4 leading-relaxed text-salt/70">
             <p>Our founder, Rosario Mamani, grew up in Colchani, where her family harvested salt by hand on the edge of the Salar. In 2009 she began guiding travellers across it — slowly, with lunch on Incahuasi and nights under the darkest skies she knew.</p>
-            <p>Word travelled. Today our studios in La Paz, Cusco and Santiago design private journeys from the Atacama to the Amazon, but every one still begins with the same question she asked her first guests: what do you hope to feel?</p>
+            <p>Word travelled. Today our studios in La Paz, Cusco and Santiago design private journeys from the Atacama to Patagonia, but every one still begins with the same question she asked her first guests: what do you hope to feel?</p>
           </FadeUp>
         </div>
       </section>

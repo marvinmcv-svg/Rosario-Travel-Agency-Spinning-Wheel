@@ -45,7 +45,7 @@ export type Journey = {
 
 const img = (name: string) => `/images/${name}.webp`;
 
-export const destinations: Destination[] = [
+const allDestinations: Destination[] = [
   {
     slug: "salar-de-uyuni",
     name: "Salar de Uyuni",
@@ -144,8 +144,8 @@ export const destinations: Destination[] = [
     coords: "13.87° S · 71.30° W",
     bestTime: "Apr – Nov, before the afternoon clouds",
     culture: "Quechua pastoral communities of Pitumarca who manage the mountain and its trails.",
-    image: img("vinicunca"),
-    gallery: [img("vinicunca-ridge")],
+    image: img("vinicunca-ridge"),
+    gallery: [],
     highlights: [
       "Red Valley crossing away from the crowds",
       "Views of Ausangate (6,384 m)",
@@ -213,7 +213,7 @@ export const destinations: Destination[] = [
     bestTime: "21 June for Willkakuti · May – Oct",
     culture: "A sacred site for the Aymara nation, who celebrate the Andean New Year here.",
     image: img("tiwanaku-gate"),
-    gallery: [img("tiwanaku-heads")],
+    gallery: [],
     highlights: ["Gate of the Sun", "Akapana pyramid", "Willkakuti — Aymara New Year", "Pumapunku stonework"],
   },
   {
@@ -255,7 +255,7 @@ export const destinations: Destination[] = [
     bestTime: "Oct – Apr, the Patagonian summer",
     culture: "Ancestral territory of the Aónikenk (Tehuelche) and Kawésqar peoples.",
     image: img("paine-cuernos"),
-    gallery: [img("paine-towers"), img("paine-dawn")],
+    gallery: [],
     highlights: ["Base of the Towers at dawn", "Grey Glacier by boat", "Puma tracking with a naturalist", "Lodge inside the park"],
   },
   {
@@ -302,7 +302,7 @@ export const destinations: Destination[] = [
   },
 ];
 
-export const journeys: Journey[] = [
+const allJourneys: Journey[] = [
   {
     slug: "andean-odyssey",
     title: "The Andean Odyssey",
@@ -403,7 +403,7 @@ export const journeys: Journey[] = [
     difficulty: "Challenging",
     maxGroup: 8,
     destinations: ["atacama", "torres-del-paine"],
-    image: img("paine-towers"),
+    image: img("paine-cuernos"),
     summary: "Chile end to end: the driest desert on Earth and the granite towers of the far south.",
     itinerary: [
       { day: "Days 1–4", title: "Atacama", text: "Valle de la Luna, Tatio geysers, Lickanantay villages and a private astronomy night." },
@@ -436,6 +436,24 @@ export const journeys: Journey[] = [
   },
 ];
 
+/* ── Photography status ────────────────────────────────────────────
+   Destinations listed here are hidden everywhere (pages, rails, hero,
+   Rosario AI, and any journey that would lose all its stops) until their
+   photographs are in /public/images. To restore one: run
+   `python3 scripts/fetch-photos.py && npm run images`, then delete its slug. */
+export const PENDING_PHOTOS: string[] = ["iguazu", "amazon"];
+
+export const destinations = allDestinations.filter((d) => !PENDING_PHOTOS.includes(d.slug));
+export const journeys = allJourneys
+  .map((j) => ({ ...j, destinations: j.destinations.filter((s) => !PENDING_PHOTOS.includes(s)) }))
+  .filter((j) => j.destinations.length > 0);
+
+const numberWords = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+const countries = new Set(destinations.flatMap((d) => d.country.split(" · ")));
+/** e.g. "Nine places" — keeps copy correct as destinations are added or hidden. */
+export const placesLabel = `${numberWords[destinations.length] ?? destinations.length} places`.replace(/^./, (c) => c.toUpperCase());
+export const countriesLabel = `${numberWords[countries.size] ?? countries.size} countries`.replace(/^./, (c) => c.toUpperCase());
+
 export const heroSlides = [
   "salar-de-uyuni",
   "lake-titicaca",
@@ -443,7 +461,7 @@ export const heroSlides = [
   "rainbow-mountain",
   "laguna-colorada",
   "torres-del-paine",
-  "iguazu",
+  "atacama",
 ] as const;
 
 export const testimonials = [

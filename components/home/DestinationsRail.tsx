@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { destinations } from "@/lib/data";
+import { destinations, placesLabel } from "@/lib/data";
 import { SplitReveal } from "../motion";
 
 /* Vertical scroll becomes a journey sideways across the continent.
@@ -57,7 +57,7 @@ export default function DestinationsRail() {
     <section ref={section} className="relative overflow-hidden bg-salt py-24 text-ink md:flex md:h-[100svh] md:flex-col md:justify-center md:py-0">
       <div className="mx-auto mb-12 flex w-full max-w-[1600px] items-end justify-between gap-6 px-5 md:px-10">
         <div>
-          <p className="eyebrow mb-5 text-copper">Eleven places that change you</p>
+          <p className="eyebrow mb-5 text-copper">{placesLabel} that change you</p>
           <SplitReveal className="font-display text-[clamp(2.6rem,6vw,6rem)] leading-[0.95] tracking-[-0.03em]">
             South America, <em className="text-lake">end to end.</em>
           </SplitReveal>

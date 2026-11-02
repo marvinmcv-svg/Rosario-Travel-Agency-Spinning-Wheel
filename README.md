@@ -8,10 +8,10 @@ A premium travel-agency website for **Rosario Travel**: private journeys to the 
 
 | Area | What it does |
 |---|---|
-| **Hero carousel** | Seven full-bleed destinations (Uyuni first). Curtain-wipe transitions in the direction of travel, slow Ken Burns push-in, per-letter title reveals, a live **altitude counter** that climbs/descends to each place, named progress rail, keyboard + swipe. |
+| **Hero carousel** | Seven full-bleed destinations (Uyuni first, then Titicaca, Machu Picchu, Vinicunca, Laguna Colorada, Torres del Paine, the Atacama). Curtain-wipe transitions in the direction of travel, slow Ken Burns push-in, per-letter title reveals, a live **altitude counter** that climbs/descends to each place, named progress rail, keyboard + swipe. |
 | **Scroll-scrubbed film** | Apple-style pinned `<canvas>` that plays a frame sequence as you scroll: **Uyuni → Titicaca → Machu Picchu**. Chapter overlays fade in at set scroll points, a route map draws itself, letterbox bars open and close. Preloads with a real percentage. |
 | **Destinations** | Horizontal pinned rail on the home page; FLIP-animated filter grid; rich detail pages (story, facts, culture, highlights, gallery, related journeys, “next destination”). |
-| **Journeys** | Six bookable itineraries. Scroll-drawn itinerary timeline, booking panel with travellers, month, **Spin the Andes promo codes**, and a confirmation reference. |
+| **Journeys** | Bookable itineraries. Scroll-drawn itinerary timeline, booking panel with travellers, month, **Spin the Andes promo codes**, and a confirmation reference. |
 | **Spin the Andes** | The prize wheel: weighted odds, inertial spin with a ticking pointer, one spin per visitor, email-gated codes that apply in the booking flow. |
 | **Rosario AI** | Concierge chat on every page. Streams answers from Claude when `ANTHROPIC_API_KEY` is set, otherwise uses a built-in offline concierge. Hands off to a human designer (creates an inquiry). |
 | **Team portal** (`/admin`) | Passcode-gated: overview KPIs + revenue chart, bookings (search/filter/drawer/status/CSV), inquiries inbox, journey pricing & visibility, wheel prizes & odds & leads, AI conversation log, audience export, settings. |
@@ -57,6 +57,8 @@ Chapter copy and timing live in one config object: `journeyFilm` in `lib/data.ts
 To regenerate the stand-in film from photographs instead: `npm run film` (Python 3 + Pillow), then `npm run frames`.
 
 ## Photographs
+
+**Iguazú and the Amazon are hidden for now** — their photographs couldn't be downloaded while building (Wikimedia rate-limited the build machine). To bring them back, run `npm run photos` on your machine (it fetches every Commons photo into `assets/source/`), then `npm run images`, and remove `"iguazu"` and `"amazon"` from `PENDING_PHOTOS` in `lib/data.ts`. Counts and copy (“Nine places…”) update automatically, and the *Waters of the South* journey reappears.
 
 Destination photography comes from Wikimedia Commons (CC BY / CC BY-SA / CC0 / public domain) and Unsplash; every photo is credited at `/credits` (`lib/credits.json`). To add or replace a photo, put the original in `assets/source/` and run `npm run images` (writes 2560 px WebP to `public/images/`).
 

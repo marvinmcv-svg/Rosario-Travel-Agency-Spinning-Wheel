@@ -10,7 +10,8 @@
     "lint": "tsc --noEmit",
     "frames": "bash scripts/extract-frames.sh",
     "film": "python3 scripts/build-journey-film.py",
-    "images": "bash scripts/optimize-images.sh"
+    "images": "bash scripts/optimize-images.sh",
+    "photos": "python3 scripts/fetch-photos.py"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

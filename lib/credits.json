@@ -91,6 +91,34 @@
   "source": "https://commons.wikimedia.org/wiki/File:Plaza_de_Armas_-_Cusco_at_night.jpg"
  },
  {
+  "name": "tiwanaku-gate",
+  "title": "Bolivia - Gate of the Sun detail - Tiwanaku or Tiahuanaco 01",
+  "author": "Dennis G. Jarvis",
+  "license": "CC BY-SA 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Bolivia_-_Gate_of_the_Sun_detail_-_Tiwanaku_or_Tiahuanaco_01.jpg"
+ },
+ {
+  "name": "atacama-anfiteatro",
+  "title": "Anfiteatro, Valle de la Luna, San Pedro de Atacama, Chile, 2016-02-01, DD 153",
+  "author": "Diego Delso",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Anfiteatro,_Valle_de_la_Luna,_San_Pedro_de_Atacama,_Chile,_2016-02-01,_DD_153.JPG"
+ },
+ {
+  "name": "atacama-dune",
+  "title": "Duna Mayor, Valle de la Luna, San Pedro de Atacama, Chile, 2016-02-01, DD 163",
+  "author": "Diego Delso",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Duna_Mayor,_Valle_de_la_Luna,_San_Pedro_de_Atacama,_Chile,_2016-02-01,_DD_163.JPG"
+ },
+ {
+  "name": "paine-cuernos",
+  "title": "Cuernos del Paine and Lago Pehoé, Chile",
+  "author": "Unsplash photographer",
+  "license": "Unsplash License",
+  "source": "https://images.unsplash.com/photo-1478827387698-1527781a4887"
+ },
+ {
   "name": "machu-picchu",
   "title": "Machu Picchu, Peru",
   "author": "Unsplash photographer",
@@ -99,14 +127,14 @@
  },
  {
   "name": "machu-picchu-terraces",
-  "title": "Machu Picchu, Peru",
+  "title": "Machu Picchu terraces, Peru",
   "author": "Unsplash photographer",
   "license": "Unsplash License",
   "source": "https://images.unsplash.com/photo-1587595431973-160d0d94add1"
  },
  {
   "name": "machu-picchu-golden",
-  "title": "Machu Picchu, Peru",
+  "title": "Machu Picchu at golden hour, Peru",
   "author": "Unsplash photographer",
   "license": "Unsplash License",
   "source": "https://images.unsplash.com/photo-1531065208531-4036c0dba3ca"

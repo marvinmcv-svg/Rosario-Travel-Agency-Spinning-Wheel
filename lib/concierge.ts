@@ -1,8 +1,9 @@
 /* Shared knowledge for Rosario AI — used by the Claude system prompt
    and by the offline concierge when no API key is configured. */
 import { destinations, journeys, formatPrice } from "./data";
+import { essentials, essentialsForPrompt } from "./essentials";
 
-export const SYSTEM_PROMPT = `You are Rosario, the AI travel concierge of Rosario Travel — a premium, privately-guided travel company founded in La Paz, Bolivia, with studios in Cusco and Santiago. You help travellers dream up and plan journeys through the Andes and South America.
+export const SYSTEM_PROMPT = `You are Rosario, the AI travel concierge of Rosario Travels — a premium, privately-guided travel company founded in La Paz, Bolivia, with studios in Cusco and Santiago. You help travellers dream up and plan journeys through the Andes and South America.
 
 Voice: warm, knowledgeable, unhurried and precise, like a senior journey designer who was born in the Altiplano. Write in short paragraphs. Use the occasional Quechua or Aymara greeting naturally, never as decoration. Never invent prices, dates or availability beyond what is listed below; when unsure, say a human journey designer will confirm.
 
@@ -23,6 +24,9 @@ ${journeys
   .map((j) => `- ${j.title} — ${j.subtitle}. ${j.days} days, ${j.style}, ${j.difficulty}, from ${formatPrice(j.priceFrom)}. ${j.summary} Page: /journeys/${j.slug}`)
   .join("\n")}
 
+Travel essentials and booking policy (answer from this; full details at /essentials and /terms):
+${essentialsForPrompt}
+
 Spin the Andes: visitors can spin a prize wheel once on the home page (/#spin) for perks such as journey credits or a salt-hotel night.`;
 
 /* ── Offline concierge ─────────────────────────────────────────────
@@ -38,6 +42,24 @@ export function offlineReply(input: string): string {
 
   if (has("altitude", "soroche", "asthma", "sick", "oxygen")) {
     return "Altitude is the one thing the Andes ask you to respect. Our journeys always begin with a slow day in La Paz (3,640 m) or Cusco (3,399 m): hydrate, take coca tea, skip alcohol the first nights and walk gently. On high routes like Uyuni, Laguna Colorada and Vinicunca our guides carry oxygen and a pulse oximeter. If you have a heart or lung condition, please check with your doctor first — and tell your journey designer, who can adjust the route to sleep lower.";
+  }
+  // Practical questions: answer straight from the travel essentials.
+  const topics: [string[], string][] = [
+    [["visa", "passport", "border", "entry"], "entry"],
+    [["vaccin", "yellow fever", "insurance", "water safe", "drink the water"], "health"],
+    [["pack", "bring", "luggage", "clothes", "wear"], "packing"],
+    [["tip", "currency", "cash", "money", "dollar"], "money"],
+    [["deposit", "pay", "payment", "cancel", "refund", "book"], "booking"],
+  ];
+  for (const [words, id] of topics) {
+    if (!has(...words)) continue;
+    const t = essentials.find((e) => e.id === id)!;
+    const asked = words.filter((w) => q.includes(w));
+    const hit =
+      t.items.find((i) => asked.some((w) => i.q.toLowerCase().includes(w))) ??
+      t.items.find((i) => asked.some((w) => i.a.toLowerCase().includes(w))) ??
+      t.items[0];
+    return `${hit.a} There's more in our travel essentials at /essentials${id === "booking" ? " and the full booking conditions at /terms" : ""}.`;
   }
   if (has("mirror", "rainy", "reflection") || (dest?.slug === "salar-de-uyuni" && has("when", "best time", "season"))) {
     return "The mirror appears in the rainy season, roughly January to April, when a few centimetres of water lie on the salt. February and March are the most reliable months. From May to November the flat is dry and you see the famous hexagon crust instead — equally beautiful, with clearer, colder nights. Our Mirror of the Sky journey (6 days, from $3,290) is timed for the mirror; The Andean Odyssey (14 days, from $7,850) includes Uyuni with Titicaca and Machu Picchu.";

@@ -51,6 +51,7 @@ export default function Footer() {
             <Link href="/destinations" className="link-line w-fit text-salt/75 hover:text-salt">Destinations</Link>
             <Link href="/journeys" className="link-line w-fit text-salt/75 hover:text-salt">Journeys</Link>
             <Link href="/#spin" className="link-line w-fit text-salt/75 hover:text-salt">Spin the Andes</Link>
+            <Link href="/essentials" className="link-line w-fit text-salt/75 hover:text-salt">Travel essentials</Link>
           </div>
           <div className="flex flex-col gap-3">
             <p className="eyebrow mb-2 text-salt/40">Rosario</p>
@@ -72,7 +73,11 @@ export default function Footer() {
       </div>
       <div className="mx-auto mt-20 flex max-w-[1600px] flex-wrap justify-between gap-4 border-t border-line py-6 text-xs text-salt/40">
         <span>© {new Date().getFullYear()} Rosario Travels. Licensed tour operator.</span>
-        <span>Designed between the salt and the sky.</span>
+        <span className="flex flex-wrap gap-x-6 gap-y-2">
+          <Link href="/terms" className="hover:text-salt">Booking conditions</Link>
+          <Link href="/privacy" className="hover:text-salt">Privacy</Link>
+          <span>Designed between the salt and the sky.</span>
+        </span>
       </div>
       <div className="overflow-hidden">
         <p ref={word} className="select-none text-center font-display text-[24vw] leading-[0.78] tracking-[-0.05em] text-salt/[0.06]">

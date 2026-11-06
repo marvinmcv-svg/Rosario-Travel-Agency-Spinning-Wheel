@@ -14,7 +14,7 @@ import os
 import time
 import urllib.request
 
-UA = "RosarioTravelSite/1.0 (photo fetch script)"
+UA = "RosarioTravelSite/1.0 (https://github.com/marvinmcv-svg/Rosario-Travel-Agency-Spinning-Wheel; photo fetch script) python-urllib"
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "source")
 
 # (paine-cuernos and machu-picchu* come from Unsplash, see lib/credits.json.)

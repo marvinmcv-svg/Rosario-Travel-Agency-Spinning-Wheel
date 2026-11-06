@@ -160,14 +160,18 @@ export default function BookingPanel({ slug }: { slug: string }) {
           <input placeholder="Phone / WhatsApp (optional)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="field" aria-label="Phone" />
           <textarea placeholder="Anything we should know? Celebrations, dietary needs, pace…" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="field resize-none" aria-label="Notes" />
           <div className="flex items-baseline justify-between border-t border-line pt-5 text-sm">
-            <span className="text-salt/60">{travellers} travellers · {months.find((m) => m.value === month)?.label}</span>
+            <span className="text-salt/60">{travellers} {travellers === 1 ? "traveller" : "travellers"} · {months.find((m) => m.value === month)?.label}</span>
             <span className="font-display text-2xl">{formatPrice(total)}</span>
           </div>
           <button className="w-full rounded-full bg-copper py-4 text-sm font-medium text-ink transition hover:bg-copper-2">Request this journey</button>
           <button type="button" onClick={() => setStep("quote")} className="w-full text-xs text-salt/50 hover:text-salt">
             ← Back
           </button>
-          <p className="text-center text-[0.7rem] text-salt/40">No payment now. A designer confirms availability and sends a tailored proposal.</p>
+          <p className="text-center text-[0.7rem] leading-relaxed text-salt/40">
+            No payment now. A designer confirms availability and sends a tailored proposal. By sending this request you agree to our{" "}
+            <Link href="/terms" className="underline underline-offset-2 hover:text-salt">booking conditions</Link> and{" "}
+            <Link href="/privacy" className="underline underline-offset-2 hover:text-salt">privacy policy</Link>.
+          </p>
         </form>
       )}
     </div>

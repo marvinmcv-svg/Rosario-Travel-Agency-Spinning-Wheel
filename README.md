@@ -20,6 +20,8 @@ A premium travel-agency website for **Rosario Travel**: private journeys to the 
 | **Adrenaline tunnel** | Pinned CSS-3D fly-through on the home page: scroll pushes the camera along Z past the adventure panels, the pointer steers it. |
 | **Adventures** (`/adventures`) | Death Road, Huayna Potosí, Uyuni night convoy, sandboarding and more: 3D tilt cards, pulse meter and a "Book on WhatsApp" link on each. Data in `lib/adventures.ts`. |
 | **WhatsApp planner** | Four-step "build your message" CTA with a live phone preview; sends to **+591 77165787** (`lib/contact.ts`). Also a floating WhatsApp button on every page and on booking confirmations. |
+| **Travel essentials** (`/essentials`) | Altitude, seasons, visas, health, packing, money and booking, as expandable Q&As with FAQ structured data. Content lives in `lib/essentials.ts` and also feeds Rosario AI, so the chat and the page always agree. |
+| **Booking conditions & privacy** (`/terms`, `/privacy`) | Deposit (30%), balance (60 days), cancellation table, changes, adventure activities, wheel prizes, data use. Deposit and cancellation figures come from `BOOKING_TERMS` in `lib/essentials.ts`. |
 | **Pay by QR** (`/payments`) | QR Simple Bolivia, Tigo Money, Yape/Plin and Binance Pay. Put your bank-issued QR images in `public/qr/` and set `qrImage` in `lib/payments.ts`; until then each QR opens a WhatsApp payment request. |
 
 ### Why the motion looks the way it does
@@ -65,8 +67,6 @@ To regenerate the stand-in film from photographs instead: `npm run film` (Python
 
 ## Photographs
 
-**Iguazú and the Amazon are hidden for now** — their photographs couldn't be downloaded while building (Wikimedia rate-limited the build machine). To bring them back, run `npm run photos` on your machine (it fetches every Commons photo into `assets/source/`), then `npm run images`, and remove `"iguazu"` and `"amazon"` from `PENDING_PHOTOS` in `lib/data.ts`. Counts and copy (“Nine places…”) update automatically, and the *Waters of the South* journey reappears.
-
 Destination photography comes from Wikimedia Commons (CC BY / CC BY-SA / CC0 / public domain) and Unsplash; every photo is credited at `/credits` (`lib/credits.json`). To add or replace a photo, put the original in `assets/source/` and run `npm run images` (writes 2560 px WebP to `public/images/`).
 
 ## Data & going to production
@@ -79,4 +79,6 @@ Rosario AI uses `claude-opus-5-5` (override with `ROSARIO_MODEL`) at low effort 
 `app/sitemap.ts` and `app/robots.ts` generate `/sitemap.xml` and `/robots.txt` (admin and API are disallowed). Set `NEXT_PUBLIC_SITE_URL` to the production domain so absolute URLs are correct. Unknown routes get a branded 404 (`app/not-found.tsx`).
 
 ## Content to review before launch
+**Booking conditions, privacy policy and travel essentials are sample text**: sensible defaults for a Bolivian operator, but have them checked by a lawyer and update the visa notes for your main markets before taking real deposits.
+
 The founder story, statistics, studio addresses, testimonials and prices are placeholder copy written for the design — replace them with Rosario's real details in `lib/data.ts`, `app/(site)/about/page.tsx` and `app/(site)/contact/page.tsx`.

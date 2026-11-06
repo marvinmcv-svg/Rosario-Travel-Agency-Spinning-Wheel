@@ -28,7 +28,7 @@ export const paymentMethods: PaymentMethod[] = [
     currency: "BOB",
     accent: "#2fb67c",
     details: [
-      { label: "Beneficiary", value: "Rosario Travel" },
+      { label: "Beneficiary", value: "Rosario Travels" },
       { label: "Works with", value: "BNB · BCP · Mercantil · BancoSol · Unión" },
     ],
     steps: ["Open your bank app and choose “Pay with QR”.", "Scan the code and enter the amount in bolivianos.", "Send us the receipt on WhatsApp — we confirm in minutes."],
@@ -41,7 +41,7 @@ export const paymentMethods: PaymentMethod[] = [
     accent: "#3d7bff",
     details: [
       { label: "Wallet", value: "Confirmed on WhatsApp" },
-      { label: "Name", value: "Rosario Travel" },
+      { label: "Name", value: "Rosario Travels" },
     ],
     steps: ["Open Tigo Money → Pay with QR.", "Scan and confirm the amount.", "Forward the confirmation SMS or screenshot to us on WhatsApp."],
   },
@@ -53,7 +53,7 @@ export const paymentMethods: PaymentMethod[] = [
     accent: "#a23ad6",
     details: [
       { label: "For", value: "Cusco & Machu Picchu journeys" },
-      { label: "Name", value: "Rosario Travel" },
+      { label: "Name", value: "Rosario Travels" },
     ],
     steps: ["Open Yape or Plin and tap Scan.", "Enter the amount in soles.", "Share the receipt with us on WhatsApp."],
   },

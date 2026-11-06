@@ -138,5 +138,54 @@
   "author": "Unsplash photographer",
   "license": "Unsplash License",
   "source": "https://images.unsplash.com/photo-1531065208531-4036c0dba3ca"
+ },
+ {
+  "name": "iguazu",
+  "title": "Iguazu-Falls-January-2013",
+  "author": "Acediscovery",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Iguazu-Falls-January-2013.jpg"
+ },
+ {
+  "name": "iguazu-gorge",
+  "title": "Iguazu Falls Salto Rivadavia 2019",
+  "author": "Alex98",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Iguazu_Falls_Salto_Rivadavia_2019.jpg"
+ },
+ {
+  "name": "amazon",
+  "title": "Amazon CIAT (3)",
+  "author": "Neil Palmer/CIAT",
+  "license": "CC BY-SA 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Amazon_CIAT_(3).jpg"
+ },
+ {
+  "name": "paine-dawn",
+  "title": "Cuernos del Paine in Torres del Paine National Park",
+  "author": "Pedro Szekely from Los Angeles, USA",
+  "license": "CC BY-SA 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Cuernos_del_Paine_in_Torres_del_Paine_National_Park.jpg"
+ },
+ {
+  "name": "paine-towers",
+  "title": "Towers of Paine - Torres del Paine National Park 13",
+  "author": "Thomas Fuhrmann",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Towers_of_Paine_-_Torres_del_Paine_National_Park_13.jpg"
+ },
+ {
+  "name": "tiwanaku-heads",
+  "title": "Templete Semisubterráneo — Cabezas talladas, Tiwanaku, Bolivia",
+  "author": "Andrea Lastra",
+  "license": "CC0",
+  "source": "https://commons.wikimedia.org/wiki/File:Templete_Semisubterráneo_—_Cabezas_talladas,_Tiwanaku,_Bolivia.jpg"
+ },
+ {
+  "name": "vinicunca",
+  "title": "Vinicunca, Rainbow Mountain",
+  "author": "Yifan Wang",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Vinicunca,_Rainbow_Mountain.jpg"
  }
 ]

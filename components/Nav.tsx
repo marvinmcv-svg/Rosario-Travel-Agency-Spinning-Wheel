@@ -15,6 +15,7 @@ const links = [
   { href: "/journeys", label: "Journeys", image: "/images/uyuni-cruiser.webp" },
   { href: "/payments", label: "Pay by QR", image: "/images/uyuni-sunset.webp" },
   { href: "/#spin", label: "Spin the Andes", image: "/images/vinicunca-ridge.webp" },
+  { href: "/essentials", label: "Travel Essentials", image: "/images/laguna-colorada.webp" },
   { href: "/about", label: "Our Story", image: "/images/titicaca-uros.webp" },
   { href: "/contact", label: "Contact", image: "/images/machu-picchu.webp" },
 ];
@@ -59,6 +60,8 @@ export default function Nav() {
   }, []);
 
   useEffect(() => {
+    // Floating buttons (WhatsApp, Rosario AI, toasts) step aside while the menu is open.
+    document.documentElement.dataset.menu = open ? "open" : "";
     if (!tl.current) return;
     if (open) {
       lenis?.stop();

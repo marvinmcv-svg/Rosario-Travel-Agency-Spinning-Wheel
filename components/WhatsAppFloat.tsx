@@ -20,7 +20,7 @@ export default function WhatsAppFloat() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with Rosario on WhatsApp"
-      className="group fixed bottom-5 left-5 z-[58] flex h-14 items-center gap-3 rounded-full bg-[#25d366] pl-4 pr-4 text-[#07280f] shadow-[0_15px_50px_-10px_rgba(37,211,102,0.7)] transition-all duration-500 hover:pr-6 md:bottom-8 md:left-8"
+      data-float className="group fixed bottom-5 left-5 z-[58] flex h-14 items-center gap-3 rounded-full bg-[#25d366] pl-4 pr-4 text-[#07280f] shadow-[0_15px_50px_-10px_rgba(37,211,102,0.7)] transition-all duration-500 hover:pr-6 md:bottom-8 md:left-8"
     >
       <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-[#25d366] opacity-30" />
       <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current" aria-hidden>

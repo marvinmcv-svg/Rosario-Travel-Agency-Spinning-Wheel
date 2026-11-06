@@ -150,3 +150,6 @@ select.field option { background: var(--color-ink-2); }
 }
 
 @keyframes twinkle { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.9; } }
+
+/* Floating buttons hide while the full-screen menu is open (set by Nav). */
+html[data-menu="open"] [data-float] { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.3s; }

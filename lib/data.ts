@@ -145,7 +145,7 @@ const allDestinations: Destination[] = [
     bestTime: "Apr – Nov, before the afternoon clouds",
     culture: "Quechua pastoral communities of Pitumarca who manage the mountain and its trails.",
     image: img("vinicunca-ridge"),
-    gallery: [],
+    gallery: [img("vinicunca")],
     highlights: [
       "Red Valley crossing away from the crowds",
       "Views of Ausangate (6,384 m)",
@@ -213,7 +213,7 @@ const allDestinations: Destination[] = [
     bestTime: "21 June for Willkakuti · May – Oct",
     culture: "A sacred site for the Aymara nation, who celebrate the Andean New Year here.",
     image: img("tiwanaku-gate"),
-    gallery: [],
+    gallery: [img("tiwanaku-heads")],
     highlights: ["Gate of the Sun", "Akapana pyramid", "Willkakuti — Aymara New Year", "Pumapunku stonework"],
   },
   {
@@ -255,7 +255,7 @@ const allDestinations: Destination[] = [
     bestTime: "Oct – Apr, the Patagonian summer",
     culture: "Ancestral territory of the Aónikenk (Tehuelche) and Kawésqar peoples.",
     image: img("paine-cuernos"),
-    gallery: [],
+    gallery: [img("paine-towers"), img("paine-dawn")],
     highlights: ["Base of the Towers at dawn", "Grey Glacier by boat", "Puma tracking with a naturalist", "Lodge inside the park"],
   },
   {
@@ -297,7 +297,7 @@ const allDestinations: Destination[] = [
     bestTime: "May – Oct for wildlife and drier trails",
     culture: "Ese'eja and other Amazonian nations who co-own and guide our partner lodges.",
     image: img("amazon"),
-    gallery: [img("amazon-mist")],
+    gallery: [],
     highlights: ["Macaw clay lick at dawn", "Canopy walkway", "Giant otters on oxbow lakes", "Indigenous-owned lodge"],
   },
 ];
@@ -441,7 +441,7 @@ const allJourneys: Journey[] = [
    Rosario AI, and any journey that would lose all its stops) until their
    photographs are in /public/images. To restore one: run
    `python3 scripts/fetch-photos.py && npm run images`, then delete its slug. */
-export const PENDING_PHOTOS: string[] = ["iguazu", "amazon"];
+export const PENDING_PHOTOS: string[] = [];
 
 export const destinations = allDestinations.filter((d) => !PENDING_PHOTOS.includes(d.slug));
 export const journeys = allJourneys

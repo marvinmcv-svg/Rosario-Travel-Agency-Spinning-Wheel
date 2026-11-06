@@ -2,12 +2,23 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check } from "lucide-react";
+import { Check, Minus } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import Itinerary from "@/components/Itinerary";
 import BookingPanel from "@/components/BookingPanel";
 import { FadeUp, SplitReveal } from "@/components/motion";
-import { destinations, formatPrice, getJourney, journeys } from "@/lib/data";
+import { destinations, formatPrice, getJourney, journeys, type Journey } from "@/lib/data";
+import { BOOKING_TERMS } from "@/lib/essentials";
+
+const notIncluded = ["International flights", "Travel insurance (required)", "Visa fees, where they apply", "Tips for guides and drivers", "Drinks and meals marked as free time"];
+
+const pace: Record<Journey["difficulty"], string> = {
+  Easy: "Gentle days with short walks. Suitable for most travellers in reasonable health.",
+  Moderate: "Some long driving days and walks of up to three or four hours, often at altitude. You should be comfortable walking uphill slowly.",
+  Challenging: "Full-day hikes or treks at high altitude. You should be fit, active and ready to train in the weeks before you travel.",
+};
+
+const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export function generateStaticParams() {
   return journeys.map((j) => ({ slug: j.slug }));
@@ -22,9 +33,22 @@ export default async function JourneyPage({ params }: { params: Promise<{ slug: 
   const j = getJourney((await params).slug);
   if (!j) notFound();
   const stops = j.destinations.map((s) => destinations.find((d) => d.slug === s)!).filter(Boolean);
+  const highest = stops.reduce((m, d) => (d.altitude > m.altitude ? d : m), stops[0]);
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    name: j.title,
+    description: j.summary,
+    image: base + j.image,
+    url: `${base}/journeys/${j.slug}`,
+    itinerary: { "@type": "ItemList", itemListElement: stops.map((d, i) => ({ "@type": "ListItem", position: i + 1, item: { "@type": "TouristDestination", name: d.name, url: `${base}/destinations/${d.slug}` } })) },
+    offers: { "@type": "Offer", price: j.priceFrom, priceCurrency: "USD", availability: "https://schema.org/InStock", url: `${base}/journeys/${j.slug}` },
+    provider: { "@type": "TravelAgency", name: "Rosario Travels", url: base },
+  };
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       <PageHero image={j.image} eyebrow={`${j.style} journey · ${j.days} days`} title={j.title}>
         <div className="flex flex-wrap items-center gap-x-10 gap-y-4 text-salt/80">
           <span className="font-display text-2xl italic">{j.subtitle}</span>
@@ -63,6 +87,35 @@ export default async function JourneyPage({ params }: { params: Promise<{ slug: 
               </p>
             ))}
           </FadeUp>
+
+          <h2 className="mt-20 font-display text-4xl text-salt/85">Not included</h2>
+          <FadeUp stagger={0.05} className="mt-6 grid gap-4 sm:grid-cols-2">
+            {notIncluded.map((n) => (
+              <p key={n} className="flex items-start gap-3 text-salt/55">
+                <Minus className="mt-1 h-4 w-4 shrink-0 text-salt/35" /> {n}
+              </p>
+            ))}
+          </FadeUp>
+
+          <h2 className="mt-24 font-display text-5xl">Good to know</h2>
+          <FadeUp stagger={0.08} className="mt-8 grid gap-6 sm:grid-cols-2">
+            {[
+              ["Highest point", `${highest.altitude.toLocaleString("en-US")} m at ${highest.name}. ${highest.altitude > 3000 ? "The route acclimatises you gradually; your guide carries oxygen." : "No altitude concerns on this journey."}`],
+              ["Pace", pace[j.difficulty]],
+              ["Best season", stops[0].bestTime],
+              ["Deposit", `${BOOKING_TERMS.depositPct}% to confirm, balance ${BOOKING_TERMS.balanceDays} days before departure. Nothing is charged until you approve your itinerary.`],
+            ].map(([k, v]) => (
+              <div key={k} className="rounded-[20px] border border-line bg-ink-2 p-6">
+                <p className="eyebrow text-copper">{k}</p>
+                <p className="mt-3 leading-relaxed text-salt/75">{v}</p>
+              </div>
+            ))}
+          </FadeUp>
+          <p className="mt-6 text-sm text-salt/55">
+            Visas, health, packing and more in our{" "}
+            <Link href="/essentials" className="link-line text-salt hover:text-copper">travel essentials</Link>, and the full{" "}
+            <Link href="/terms" className="link-line text-salt hover:text-copper">booking conditions</Link>.
+          </p>
         </div>
 
         <aside className="lg:col-span-4 lg:col-start-9">

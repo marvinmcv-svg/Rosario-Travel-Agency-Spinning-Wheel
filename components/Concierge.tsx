@@ -142,7 +142,7 @@ export default function Concierge() {
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`fixed bottom-5 right-5 z-[60] flex items-center gap-3 rounded-full border border-salt/15 bg-ink/80 py-2 pl-2 pr-5 shadow-2xl backdrop-blur-xl transition hover:border-copper md:bottom-8 md:right-8 transition-[opacity,transform] duration-700 ${open || !revealed ? "pointer-events-none translate-y-4 opacity-0" : "opacity-100"}`}
+        data-float className={`fixed bottom-5 right-5 z-[60] flex items-center gap-3 rounded-full border border-salt/15 bg-ink/80 py-2 pl-2 pr-5 shadow-2xl backdrop-blur-xl transition hover:border-copper md:bottom-8 md:right-8 transition-[opacity,transform] duration-700 ${open || !revealed ? "pointer-events-none translate-y-4 opacity-0" : "opacity-100"}`}
         aria-label="Open Rosario AI concierge"
       >
         <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-copper text-ink">

@@ -239,7 +239,7 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
               <ChevronLeft className="h-5 w-5 opacity-70" />
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-copper font-display text-lg text-ink">R</span>
               <div className="flex-1">
-                <p className="text-[0.95rem] font-medium">Rosario Travel</p>
+                <p className="text-[0.95rem] font-medium">Rosario Travels</p>
                 <p className="text-xs opacity-60">{typing ? "typing…" : "online"}</p>
               </div>
               <MoreVertical className="h-5 w-5 opacity-70" />

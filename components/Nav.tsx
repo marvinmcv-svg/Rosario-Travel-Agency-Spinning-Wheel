@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { useLenis } from "./SmoothScroll";
 import { openConcierge } from "./concierge-bus";
+import { Wordmark } from "./Preloader";
 
 const links = [
   { href: "/adventures", label: "Adventures", image: "/images/atacama-dune.webp" },
@@ -79,8 +80,15 @@ export default function Nav() {
         }`}
       >
         <nav className="mx-auto flex h-20 max-w-[1600px] items-center justify-between px-5 md:px-10">
-          <Link href="/" className="group flex items-baseline gap-2" aria-label="Rosario — home">
-            <span className="font-display text-[1.9rem] leading-none tracking-tight">Rosario</span>
+          <Link
+            href="/"
+            aria-label="Rosario Travels — home"
+            className={`group flex items-baseline gap-2 transition-opacity duration-500 ${
+              // On the home hero the big wordmark is the logo; the nav one appears once you scroll.
+              pathname === "/" && !solid && !open ? "pointer-events-none opacity-0" : "opacity-100"
+            }`}
+          >
+            <Wordmark className="text-[1.7rem] [text-shadow:0_1px_16px_rgb(10_11_12/0.55)] md:text-[1.9rem]" />
             <span className="eyebrow hidden text-[0.6rem] text-salt/50 sm:inline">Andes · Since 2009</span>
           </Link>
 

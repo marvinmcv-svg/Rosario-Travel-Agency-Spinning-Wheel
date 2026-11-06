@@ -71,7 +71,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="mx-auto mt-20 flex max-w-[1600px] flex-wrap justify-between gap-4 border-t border-line py-6 text-xs text-salt/40">
-        <span>© {new Date().getFullYear()} Rosario Travel. Licensed tour operator.</span>
+        <span>© {new Date().getFullYear()} Rosario Travels. Licensed tour operator.</span>
         <span>Designed between the salt and the sky.</span>
       </div>
       <div className="overflow-hidden">

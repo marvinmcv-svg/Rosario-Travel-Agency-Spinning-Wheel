@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { gsap, ScrollTrigger, SplitText, prefersReducedMotion } from "@/lib/gsap";
 import { destinations, heroSlides } from "@/lib/data";
-import { READY_EVENT, siteReady } from "../Preloader";
+import { READY_EVENT, siteReady, Wordmark } from "../Preloader";
 import { openConcierge } from "../concierge-bus";
 
 const slides = heroSlides.map((s) => destinations.find((d) => d.slug === s)!);
@@ -262,6 +262,16 @@ export default function HeroCarousel() {
         <div className="grain pointer-events-none absolute inset-0 overflow-hidden" />
       </div>
 
+      {/* Brand: the wordmark the entrance flyover swooshes into place */}
+      <div data-hero-copy className="pointer-events-none absolute inset-x-0 top-24 z-10 md:top-32">
+        <div className="mx-auto max-w-[1600px] px-5 md:px-10">
+          <h1 data-hero-brand className="w-fit [text-shadow:0_2px_30px_rgb(10_11_12/0.5)]">
+            <Wordmark className="block text-[clamp(1.9rem,3.6vw,3.4rem)] text-salt" />
+            <span className="sr-only"> — private journeys through the Andes and South America</span>
+          </h1>
+        </div>
+      </div>
+
       {/* Copy */}
       <div data-hero-copy className="relative z-10 mx-auto flex h-full max-w-[1600px] flex-col justify-end px-5 pb-36 md:px-10 md:pb-40">
         <div className="relative min-h-[300px] md:min-h-[340px]">
@@ -271,9 +281,9 @@ export default function HeroCarousel() {
                 <span className="h-px w-8 bg-copper" />
                 {d.country} — {d.region}
               </p>
-              <h1 data-title className="font-display text-[clamp(3.4rem,10.5vw,10.5rem)] leading-[0.88] tracking-[-0.035em]">
+              <h2 data-title className="font-display text-[clamp(3.4rem,10.5vw,10.5rem)] leading-[0.88] tracking-[-0.035em]">
                 {d.name}
-              </h1>
+              </h2>
               <p data-fade className="mt-6 max-w-xl font-display text-[clamp(1.25rem,2vw,1.75rem)] italic text-salt/85">
                 {d.tagline}
               </p>

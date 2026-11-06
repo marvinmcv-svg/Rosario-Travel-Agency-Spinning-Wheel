@@ -148,3 +148,5 @@ select.field option { background: var(--color-ink-2); }
   .grain::after { animation: none; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+@keyframes twinkle { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.9; } }

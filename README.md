@@ -1,4 +1,4 @@
-# Rosario — Journeys through the Andes
+# Rosario Travels — Journeys through the Andes
 
 A premium travel-agency website for **Rosario Travel**: private journeys to the Salar de Uyuni, Lake Titicaca, Machu Picchu, Patagonia, Iguazú and the Amazon.
 
@@ -16,7 +16,7 @@ A premium travel-agency website for **Rosario Travel**: private journeys to the 
 | **Rosario AI** | Concierge chat on every page. Streams answers from Claude when `ANTHROPIC_API_KEY` is set, otherwise uses a built-in offline concierge. Hands off to a human designer (creates an inquiry). |
 | **Team portal** (`/admin`) | Passcode-gated: overview KPIs + revenue chart, bookings (search/filter/drawer/status/CSV), inquiries inbox, journey pricing & visibility, wheel prizes & odds & leads, AI conversation log, audience export, settings. |
 
-| **Crash-landing preloader** | Canvas film opening: an airliner with a burning engine flies out of the Andes dusk straight at the lens, hits the "glass" (flash, shake, cracks, debris) and the screen catches fire while the site loads; the flames then burn the curtain away. Skippable; reduced-motion safe. |
+| **Flyover entrance** | An airliner crosses a dusk sky over the Andes, drawing a contrail; "Rosario Travels" is unveiled in its wake. While the site loads (real percentage), the contrail drifts away; then the sky lifts and the wordmark swooshes down into its permanent place in the hero. Skippable; reduced-motion safe. Code: `components/Preloader.tsx` (the shared `Wordmark` lives there too). |
 | **Adrenaline tunnel** | Pinned CSS-3D fly-through on the home page: scroll pushes the camera along Z past the adventure panels, the pointer steers it. |
 | **Adventures** (`/adventures`) | Death Road, Huayna Potosí, Uyuni night convoy, sandboarding and more: 3D tilt cards, pulse meter and a "Book on WhatsApp" link on each. Data in `lib/adventures.ts`. |
 | **WhatsApp planner** | Four-step "build your message" CTA with a live phone preview; sends to **+591 77165787** (`lib/contact.ts`). Also a floating WhatsApp button on every page and on booking confirmations. |
@@ -24,6 +24,7 @@ A premium travel-agency website for **Rosario Travel**: private journeys to the 
 
 ### Why the motion looks the way it does
 Every animation carries meaning rather than decoration:
+- **Entrance:** you arrive by plane; the brand is written in the sky and then lands with you on the first destination.
 - **Hero:** the camera drifts forward (Ken Burns), and the next place arrives from the direction you're travelling. The altitude readout literally moves you up and down the Andes.
 - **Manifesto:** the statement lights up word by word at the speed you scroll, i.e. your reading pace.
 - **Film:** scroll *is* the journey; the route line on the map draws as the footage advances.
@@ -73,6 +74,9 @@ Destination photography comes from Wikimedia Commons (CC BY / CC BY-SA / CC0 / p
 All bookings, inquiries, leads, conversations and admin edits flow through one module, **`lib/store.ts`**. It persists to `localStorage` so the whole product works with zero infrastructure (and seeds demo data so the portal is meaningful on first open). For production, re-implement its `read`/`write` (or the `actions`) against Supabase/Postgres/an API — no component changes needed.
 
 Rosario AI uses `claude-opus-5-5` (override with `ROSARIO_MODEL`) at low effort for quick replies, with prompt caching on the catalogue system prompt and server-side refusal fallbacks enabled. Its knowledge comes from `lib/data.ts` via `lib/concierge.ts`.
+
+## SEO
+`app/sitemap.ts` and `app/robots.ts` generate `/sitemap.xml` and `/robots.txt` (admin and API are disallowed). Set `NEXT_PUBLIC_SITE_URL` to the production domain so absolute URLs are correct. Unknown routes get a branded 404 (`app/not-found.tsx`).
 
 ## Content to review before launch
 The founder story, statistics, studio addresses, testimonials and prices are placeholder copy written for the design — replace them with Rosario's real details in `lib/data.ts`, `app/(site)/about/page.tsx` and `app/(site)/contact/page.tsx`.

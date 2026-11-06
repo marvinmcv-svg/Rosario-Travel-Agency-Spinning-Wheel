@@ -9,13 +9,14 @@ const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
-    default: "Rosario — Journeys through the Andes & South America",
-    template: "%s · Rosario",
+    default: "Rosario Travels — Journeys through the Andes & South America",
+    template: "%s · Rosario Travels",
   },
   description:
     "Private, slow and deeply local journeys to the Salar de Uyuni, Lake Titicaca, Machu Picchu, Patagonia and beyond — designed by Rosario.",
   openGraph: {
-    title: "Rosario — Journeys through the Andes",
+    title: "Rosario Travels — Journeys through the Andes",
+    siteName: "Rosario Travels",
     description: "Uyuni · Titicaca · Machu Picchu · Patagonia. Private journeys designed by people who were born there.",
     images: ["/images/uyuni-mirror.webp"],
   },

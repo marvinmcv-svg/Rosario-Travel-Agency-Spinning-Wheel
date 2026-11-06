@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { actions } from "@/lib/store";
+import { waLink, WHATSAPP_DISPLAY } from "@/lib/contact";
 
 export default function Footer() {
   const word = useRef<HTMLParagraphElement>(null);
@@ -46,6 +47,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-10 text-sm md:col-span-6 md:col-start-7 md:grid-cols-3">
           <div className="flex flex-col gap-3">
             <p className="eyebrow mb-2 text-salt/40">Travel</p>
+            <Link href="/adventures" className="link-line w-fit text-salt/75 hover:text-salt">Adventures</Link>
             <Link href="/destinations" className="link-line w-fit text-salt/75 hover:text-salt">Destinations</Link>
             <Link href="/journeys" className="link-line w-fit text-salt/75 hover:text-salt">Journeys</Link>
             <Link href="/#spin" className="link-line w-fit text-salt/75 hover:text-salt">Spin the Andes</Link>
@@ -54,6 +56,7 @@ export default function Footer() {
             <p className="eyebrow mb-2 text-salt/40">Rosario</p>
             <Link href="/about" className="link-line w-fit text-salt/75 hover:text-salt">Our story</Link>
             <Link href="/contact" className="link-line w-fit text-salt/75 hover:text-salt">Contact</Link>
+            <Link href="/payments" className="link-line w-fit text-salt/75 hover:text-salt">Pay by QR</Link>
             <Link href="/credits" className="link-line w-fit text-salt/75 hover:text-salt">Photo credits</Link>
             <Link href="/admin" className="link-line w-fit text-salt/75 hover:text-salt">Team portal</Link>
           </div>
@@ -63,6 +66,7 @@ export default function Footer() {
             <span className="text-salt/75">Cusco, Peru</span>
             <span className="text-salt/75">Santiago, Chile</span>
             <a href="mailto:journeys@rosario.travel" className="link-line w-fit text-salt/75 hover:text-salt">journeys@rosario.travel</a>
+            <a href={waLink()} target="_blank" rel="noopener noreferrer" className="link-line w-fit text-[#25d366] hover:text-salt">WhatsApp {WHATSAPP_DISPLAY}</a>
           </div>
         </div>
       </div>

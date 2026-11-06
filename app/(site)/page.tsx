@@ -7,6 +7,8 @@ import SignatureJourneys from "@/components/home/SignatureJourneys";
 import SpinWheel from "@/components/home/SpinWheel";
 import Testimonials from "@/components/home/Testimonials";
 import ConciergeCTA from "@/components/home/ConciergeCTA";
+import AdrenalineTunnel from "@/components/home/AdrenalineTunnel";
+import WhatsAppCTA from "@/components/home/WhatsAppCTA";
 
 /* The home page is told as one journey:
    1. Hero        — the places, one by one (choose your horizon)
@@ -14,9 +16,11 @@ import ConciergeCTA from "@/components/home/ConciergeCTA";
    3. Film        — scroll-scrubbed: Uyuni → Titicaca → Machu Picchu
    4. Rail        — everywhere else we go, travelled sideways
    5. Journeys    — how to go, priced and bookable
-   6. Wheel       — a reason to start now
-   7. Voices      — travellers who went
-   8. Rosario AI  — begin the conversation */
+   6. Adrenaline  — 3D fly-through of the adventure programme
+   7. Wheel       — a reason to start now
+   8. Voices      — travellers who went
+   9. WhatsApp    — four-step planner, sends to +591 77165787
+  10. Rosario AI  — begin the conversation */
 export default function Home() {
   return (
     <>
@@ -26,8 +30,10 @@ export default function Home() {
       <JourneyFilm />
       <DestinationsRail />
       <SignatureJourneys />
+      <AdrenalineTunnel />
       <SpinWheel />
       <Testimonials />
+      <WhatsAppCTA />
       <ConciergeCTA />
     </>
   );

@@ -3,6 +3,7 @@ import PageHero from "@/components/PageHero";
 import ContactForm from "@/components/ContactForm";
 import AskRosario from "@/components/AskRosario";
 import { FadeUp } from "@/components/motion";
+import WhatsAppPlanner from "@/components/WhatsAppPlanner";
 
 export const metadata: Metadata = { title: "Contact", description: "Talk to a Rosario journey designer in La Paz, Cusco or Santiago." };
 
@@ -38,6 +39,13 @@ export default function ContactPage() {
               </div>
             ))}
           </FadeUp>
+        </div>
+      </section>
+      <section id="whatsapp" className="border-t border-line px-5 py-28 md:px-10">
+        <div className="mx-auto max-w-[1600px]">
+          <p className="eyebrow mb-4 text-[#25d366]">Fastest reply · WhatsApp</p>
+          <p className="font-impact mb-14 text-[clamp(2.6rem,6vw,5.5rem)] uppercase leading-[0.9]">Message us in four taps</p>
+          <WhatsAppPlanner />
         </div>
       </section>
     </>

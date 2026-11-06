@@ -9,8 +9,10 @@ import { useLenis } from "./SmoothScroll";
 import { openConcierge } from "./concierge-bus";
 
 const links = [
+  { href: "/adventures", label: "Adventures", image: "/images/atacama-dune.webp" },
   { href: "/destinations", label: "Destinations", image: "/images/titicaca-sunset.webp" },
   { href: "/journeys", label: "Journeys", image: "/images/uyuni-cruiser.webp" },
+  { href: "/payments", label: "Pay by QR", image: "/images/uyuni-sunset.webp" },
   { href: "/#spin", label: "Spin the Andes", image: "/images/vinicunca-ridge.webp" },
   { href: "/about", label: "Our Story", image: "/images/titicaca-uros.webp" },
   { href: "/contact", label: "Contact", image: "/images/machu-picchu.webp" },

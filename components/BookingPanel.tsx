@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { waLink } from "@/lib/contact";
+
 import { useMemo, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { formatPrice } from "@/lib/data";
@@ -46,6 +49,19 @@ export default function BookingPanel({ slug }: { slug: string }) {
         <p className="mt-4 leading-relaxed text-salt/70">
           Your reference is <span className="font-mono text-salt">{booking.id}</span>. A journey designer will write within 24 hours to shape {journey.title} around you. Nothing is charged until you confirm.
         </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href={waLink(`Hi Rosario! I just requested ${journey.title} (ref ${booking.id}) for ${booking.travellers} travellers. Can we confirm on WhatsApp?`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-[#25d366] px-5 py-3 text-sm font-medium text-[#07280f]"
+          >
+            Confirm on WhatsApp
+          </a>
+          <Link href={`/payments?ref=${booking.id}&amount=${Math.round(booking.total * 0.3)}`} className="rounded-full border border-salt/25 px-5 py-3 text-sm transition hover:border-copper">
+            Pay 30% deposit by QR
+          </Link>
+        </div>
       </div>
     );
   }

@@ -32,7 +32,7 @@ export default function Announcement() {
   }, [text]);
   if (!show || !text) return null;
   return (
-    <div className="fixed bottom-24 left-5 right-5 z-[55] max-w-sm sm:right-auto animate-[toast_0.8s_var(--ease-expo)] rounded-2xl border border-line bg-ink-2/90 p-5 pr-12 text-sm text-salt/85 shadow-2xl backdrop-blur-xl md:bottom-8 md:left-8">
+    <div className="fixed bottom-24 left-5 right-5 z-[55] max-w-sm sm:right-auto animate-[toast_0.8s_var(--ease-expo)] rounded-2xl border border-line bg-ink-2/90 p-5 pr-12 text-sm text-salt/85 shadow-2xl backdrop-blur-xl md:bottom-28 md:left-8">
       <p className="eyebrow mb-2 text-gold">News from the Altiplano</p>
       {text}
       <button

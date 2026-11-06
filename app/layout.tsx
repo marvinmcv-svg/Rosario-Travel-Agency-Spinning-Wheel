@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Instrument_Serif } from "next/font/google";
+import { Anton, Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
@@ -24,7 +25,7 @@ export const viewport: Viewport = { themeColor: "#0a0b0c" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${serif.variable} ${inter.variable}`}>
+    <html lang="en" className={`${serif.variable} ${inter.variable} ${anton.variable}`}>
       <body>{children}</body>
     </html>
   );

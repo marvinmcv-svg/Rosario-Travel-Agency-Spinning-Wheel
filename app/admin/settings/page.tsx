@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { actions, useDB } from "@/lib/store";
+import { actions, SHARED, useDB } from "@/lib/store";
 import { AdminHeader } from "@/components/admin/AdminShell";
 import { Card, btn, btnSolid } from "@/components/admin/ui";
 
@@ -53,9 +53,11 @@ export default function SettingsAdmin() {
           Save changes
         </button>
         {saved && <span className="text-sm text-emerald-200">Saved ✓</span>}
-        <button className={`${btn} ml-auto`} onClick={() => confirm("Reset all portal data to the demo dataset?") && actions.resetDemo()}>
-          Reset demo data
-        </button>
+        {!SHARED && (
+          <button className={`${btn} ml-auto`} onClick={() => confirm("Reset all portal data to the demo dataset?") && actions.resetDemo()}>
+            Reset demo data
+          </button>
+        )}
       </div>
     </>
   );

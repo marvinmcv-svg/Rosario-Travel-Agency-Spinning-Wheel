@@ -4,11 +4,17 @@
    Rosario data store.
 
    One small, typed persistence layer shared by the public site and
-   the admin portal. It runs on localStorage so the whole product works
-   with zero infrastructure (bookings made on the site appear instantly
-   in the admin). To go to production, re-implement `read`/`write`
-   below against Supabase, Postgres or any API — every component talks
-   to this module only.
+   the admin portal. Every component talks to this module only.
+
+   Two modes:
+   • Shared (production): when Supabase is configured on the server
+     (SUPABASE_URL + SUPABASE_SECRET_KEY), visitors' bookings, inquiries,
+     wheel leads, chats and sign-ups are sent to /api/store and saved in
+     the database; the team portal loads and edits them via
+     /api/admin/store. Submissions that fail (offline, server error) wait
+     in an outbox in the browser and are retried.
+   • Demo: without Supabase everything lives in this browser's
+     localStorage, seeded with sample data so the portal has content.
    ────────────────────────────────────────────────────────────── */
 
 import { useSyncExternalStore } from "react";
@@ -76,7 +82,13 @@ type DB = {
   seeded: boolean;
 };
 
-const KEY = "rosario.db.v1";
+/** Set at build time by next.config.ts when Supabase is configured. */
+export const SHARED = process.env.NEXT_PUBLIC_SHARED_STORE === "1";
+
+// In shared mode the browser keeps only the visitor's own records (e.g. their wheel code).
+const KEY = SHARED ? "rosario.visitor.v1" : "rosario.db.v1";
+const OUTBOX = "rosario.outbox.v1";
+let role: "visitor" | "admin" = "visitor";
 
 const defaultSettings: Settings = {
   aiGreeting:
@@ -171,17 +183,22 @@ function read(): DB {
   try {
     const raw = window.localStorage.getItem(KEY);
     const parsed = raw ? ({ ...empty(), ...JSON.parse(raw) } as DB) : empty();
-    cache = parsed.seeded ? parsed : seed(parsed);
-    if (!parsed.seeded) write(cache);
+    if (SHARED) {
+      cache = { ...parsed, seeded: true };
+    } else {
+      cache = parsed.seeded ? parsed : seed(parsed);
+      if (!parsed.seeded) write(cache);
+    }
   } catch {
-    cache = seed(empty());
+    cache = SHARED ? { ...empty(), seeded: true } : seed(empty());
   }
   return cache;
 }
 
 function write(next: DB) {
   cache = next;
-  try {
+  // The portal's copy of the shared database is never written to this browser.
+  if (role !== "admin") try {
     window.localStorage.setItem(KEY, JSON.stringify(next));
   } catch {
     /* storage may be unavailable (private mode) — keep working in memory */
@@ -201,6 +218,108 @@ if (typeof window !== "undefined") {
       listeners.forEach((l) => l());
     }
   });
+}
+
+/* ── sync with the server (shared mode) ────────────────────────── */
+type Job = { op: string; data: unknown };
+const loadOutbox = (): Job[] => {
+  try {
+    return JSON.parse(localStorage.getItem(OUTBOX) || "[]");
+  } catch {
+    return [];
+  }
+};
+const saveOutbox = (jobs: Job[]) => {
+  try {
+    if (jobs.length) localStorage.setItem(OUTBOX, JSON.stringify(jobs));
+    else localStorage.removeItem(OUTBOX);
+  } catch {}
+};
+let flushing = false;
+async function flush() {
+  if (flushing || typeof window === "undefined") return;
+  flushing = true;
+  try {
+    let jobs = loadOutbox();
+    while (jobs.length) {
+      let res: Response;
+      try {
+        res = await fetch("/api/store", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jobs[0]), keepalive: true });
+      } catch {
+        break; // offline: try again later
+      }
+      // 5xx / 429 are worth retrying; other 4xx would fail forever, so drop them.
+      if (!res.ok && (res.status >= 500 || res.status === 429 || res.status === 408)) break;
+      if (!res.ok) console.warn("[store] dropped", jobs[0].op, res.status);
+      jobs = jobs.slice(1);
+      saveOutbox(jobs);
+    }
+  } finally {
+    flushing = false;
+  }
+}
+/** Queue a visitor submission for the server (conversations replace earlier saves of themselves). */
+function send(op: string, data: { id?: string; email?: string }) {
+  if (!SHARED) return;
+  const jobs = loadOutbox().filter((j) => !(op === "saveConversation" && j.op === op && (j.data as { id?: string }).id === data.id));
+  saveOutbox([...jobs, { op, data }]);
+  void flush();
+}
+
+async function adminSend(op: string, args: Record<string, unknown>) {
+  if (!SHARED || role !== "admin") return;
+  try {
+    const r = await fetch("/api/admin/store", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ op, args }) });
+    if (!r.ok) throw new Error(String(r.status));
+  } catch {
+    alert("That change couldn't be saved. Check your connection; the portal will reload the latest data.");
+    void refreshAdmin();
+  }
+}
+
+async function refreshAdmin() {
+  const r = await fetch("/api/admin/store", { cache: "no-store" });
+  if (!r.ok) throw new Error(String(r.status));
+  const d = await r.json();
+  if (!d.shared) return;
+  const { shared: _shared, ...rest } = d;
+  void _shared;
+  cache = { ...empty(), ...rest, seeded: true };
+  listeners.forEach((l) => l());
+}
+
+/** Called by the team portal once signed in: loads the shared database and keeps it fresh. */
+export function connectAdmin(onReady: () => void) {
+  if (!SHARED) {
+    onReady();
+    return () => {};
+  }
+  role = "admin";
+  cache = null;
+  let stopped = false;
+  const load = () => refreshAdmin().catch(() => {}).finally(() => !stopped && onReady());
+  void load();
+  const timer = window.setInterval(() => void refreshAdmin().catch(() => {}), 60_000);
+  const onFocus = () => void refreshAdmin().catch(() => {});
+  window.addEventListener("focus", onFocus);
+  return () => {
+    stopped = true;
+    window.clearInterval(timer);
+    window.removeEventListener("focus", onFocus);
+  };
+}
+
+if (typeof window !== "undefined" && SHARED && !window.location.pathname.startsWith("/admin")) {
+  // Visitors: pick up the team's settings, prizes and prices, and retry anything unsent.
+  fetch("/api/store", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => {
+      if (!d?.shared || role === "admin") return;
+      update((db) => ({ ...db, settings: d.settings, wheelPrizes: d.wheelPrizes, journeyOverrides: d.journeyOverrides }));
+    })
+    .catch(() => {});
+  void flush();
+  window.addEventListener("online", () => void flush());
 }
 
 const subscribe = (l: () => void) => {
@@ -228,27 +347,32 @@ export const actions = {
   createBooking(b: Omit<Booking, "id" | "createdAt" | "status">) {
     const booking: Booking = {
       ...b,
-      id: `RB-${1100 + read().bookings.length + Math.floor(Math.random() * 900)}`,
+      id: `RB-${rand(6)}`,
       createdAt: new Date().toISOString(),
       status: "new",
     };
     update((db) => ({ ...db, bookings: [booking, ...db.bookings] }));
+    send("createBooking", booking);
     return booking;
   },
   setBookingStatus(id: string, status: BookingStatus) {
     update((db) => ({ ...db, bookings: db.bookings.map((b) => (b.id === id ? { ...b, status } : b)) }));
+    void adminSend("setBookingStatus", { id, status });
   },
   deleteBooking(id: string) {
     update((db) => ({ ...db, bookings: db.bookings.filter((b) => b.id !== id) }));
+    void adminSend("deleteBooking", { id });
   },
 
   createInquiry(i: Omit<Inquiry, "id" | "createdAt" | "status">) {
-    const inquiry: Inquiry = { ...i, id: `IQ-${312 + read().inquiries.length}`, createdAt: new Date().toISOString(), status: "open" };
+    const inquiry: Inquiry = { ...i, id: `IQ-${rand(6)}`, createdAt: new Date().toISOString(), status: "open" };
     update((db) => ({ ...db, inquiries: [inquiry, ...db.inquiries] }));
+    send("createInquiry", inquiry);
     return inquiry;
   },
   setInquiryStatus(id: string, status: Inquiry["status"]) {
     update((db) => ({ ...db, inquiries: db.inquiries.map((q) => (q.id === id ? { ...q, status } : q)) }));
+    void adminSend("setInquiryStatus", { id, status });
   },
 
   createLead(email: string, prize: WheelPrize) {
@@ -262,10 +386,15 @@ export const actions = {
       redeemed: false,
     };
     update((db) => ({ ...db, leads: [lead, ...db.leads] }));
+    send("createLead", lead);
     return lead;
   },
+  /** Portal: flips a code's redeemed flag. On the website it only marks the visitor's own copy;
+      the server redeems the code itself when the booking arrives. */
   toggleLeadRedeemed(id: string) {
-    update((db) => ({ ...db, leads: db.leads.map((l) => (l.id === id ? { ...l, redeemed: !l.redeemed } : l)) }));
+    const redeemed = !read().leads.find((l) => l.id === id)?.redeemed;
+    update((db) => ({ ...db, leads: db.leads.map((l) => (l.id === id ? { ...l, redeemed } : l)) }));
+    void adminSend("setLeadRedeemed", { id, redeemed });
   },
 
   saveConversation(c: Conversation) {
@@ -276,6 +405,7 @@ export const actions = {
         conversations: exists ? db.conversations.map((x) => (x.id === c.id ? c : x)) : [c, ...db.conversations],
       };
     });
+    send("saveConversation", c);
   },
 
   subscribe(email: string) {
@@ -284,6 +414,7 @@ export const actions = {
         ? db
         : { ...db, subscribers: [{ email, createdAt: new Date().toISOString() }, ...db.subscribers] },
     );
+    send("subscribe", { email });
   },
 
   setJourneyOverride(slug: string, patch: JourneyOverride) {
@@ -291,17 +422,22 @@ export const actions = {
       ...db,
       journeyOverrides: { ...db.journeyOverrides, [slug]: { ...db.journeyOverrides[slug], ...patch } },
     }));
+    void adminSend("setJourneyOverrides", { value: read().journeyOverrides });
   },
 
   setWheelPrizes(prizes: WheelPrize[]) {
     update((db) => ({ ...db, wheelPrizes: prizes }));
+    void adminSend("setWheelPrizes", { value: prizes });
   },
 
   setSettings(patch: Partial<Settings>) {
     update((db) => ({ ...db, settings: { ...db.settings, ...patch } }));
+    void adminSend("setSettings", { value: read().settings });
   },
 
+  /** Demo mode only: the shared database is never wiped from the portal. */
   resetDemo() {
+    if (SHARED) return;
     write(seed(empty()));
   },
 };

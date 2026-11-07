@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CalendarCheck, Disc3, Inbox, LayoutDashboard, LogOut, Map, Menu, MessagesSquare, Settings, Users, X } from "lucide-react";
 import { gsap } from "@/lib/gsap";
-import { useDB } from "@/lib/store";
+import { connectAdmin, SHARED, useDB } from "@/lib/store";
 
 const nav = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
@@ -48,7 +48,7 @@ function Login({ onDone }: { onDone: () => void }) {
         <button disabled={busy || !code} className="mt-8 w-full rounded-full bg-copper py-3.5 text-sm font-medium text-ink transition hover:bg-copper-2 disabled:opacity-50">
           {busy ? "Checking…" : "Enter"}
         </button>
-        <p className="mt-5 text-center text-xs text-salt/40">Demo passcode: <span className="font-mono text-salt/60">rosario</span></p>
+        {!SHARED && <p className="mt-5 text-center text-xs text-salt/40">Demo passcode: <span className="font-mono text-salt/60">rosario</span></p>}
       </form>
     </div>
   );
@@ -56,6 +56,7 @@ function Login({ onDone }: { onDone: () => void }) {
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const pathname = usePathname();
   const content = useRef<HTMLDivElement>(null);
@@ -70,14 +71,21 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       .catch(() => setAuthed(false));
   }, []);
 
+  // Once signed in, load the shared bookings database (no-op in demo mode).
+  useEffect(() => {
+    if (!authed) return;
+    return connectAdmin(() => setLoaded(true));
+  }, [authed]);
+
   // Each section eases in so moving around the portal feels continuous.
   useEffect(() => {
     setDrawer(false);
     if (content.current) gsap.fromTo(content.current, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.6 });
-  }, [pathname, authed]);
+  }, [pathname, authed, loaded]);
 
   if (authed === null) return <div className="min-h-svh bg-ink" />;
   if (!authed) return <Login onDone={() => setAuthed(true)} />;
+  if (!loaded) return <div className="flex min-h-svh items-center justify-center bg-ink text-sm text-salt/50">Loading bookings…</div>;
 
   const Side = (
     <aside className="flex h-full flex-col gap-1 p-4">

@@ -56,7 +56,7 @@ export default function Concierge() {
       setInput("");
       setBusy(true);
       const now = () => new Date().toISOString();
-      const base: Conversation = conv ?? { id: `CV-${Date.now()}`, startedAt: now(), messages: [], mode: "offline" };
+      const base: Conversation = conv ?? { id: `CV-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`, startedAt: now(), messages: [], mode: "offline" };
       const history: ChatMessage[] = [...base.messages, { role: "user", content, at: now() }];
       let working: Conversation = { ...base, messages: [...history, { role: "assistant", content: "", at: now() }] };
       setConv(working);

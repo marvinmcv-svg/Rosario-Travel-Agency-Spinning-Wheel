@@ -74,7 +74,21 @@ Destination photography comes from Wikimedia Commons (CC BY / CC BY-SA / CC0 / p
 
 ## Data & going to production
 
-All bookings, inquiries, leads, conversations and admin edits flow through one module, **`lib/store.ts`**. It persists to `localStorage` so the whole product works with zero infrastructure (and seeds demo data so the portal is meaningful on first open). For production, re-implement its `read`/`write` (or the `actions`) against Supabase/Postgres/an API — no component changes needed.
+All bookings, inquiries, wheel leads, Rosario AI conversations, newsletter sign-ups and portal edits flow through one module, **`lib/store.ts`**, which runs in one of two modes:
+
+| Mode | When | What happens |
+|---|---|---|
+| **Shared** (production) | `SUPABASE_URL` and `SUPABASE_SECRET_KEY` are set | Visitors' submissions go to `/api/store` and are saved in Supabase; the team portal loads and edits them through `/api/admin/store` (passcode-gated) and refreshes every minute. If a visitor is offline, their booking waits in an outbox in the browser and is sent on their next page view. |
+| **Demo** | those variables are missing | Everything lives in each browser's `localStorage`, seeded with sample data so the portal is meaningful on first open. Nothing reaches the team. |
+
+**Turning on the shared database**
+1. In Supabase, run `supabase/migrations/20261107000000_shared_store.sql` (SQL editor, or `supabase db push`). Every table has row-level security on and no policies, so the publishable/anon key can read nothing; only the server's secret key can.
+2. In Vercel → Project → Settings → Environment Variables, add `SUPABASE_URL`, `SUPABASE_SECRET_KEY` (Supabase → Project Settings → API keys; the legacy `SUPABASE_SERVICE_ROLE_KEY` also works) and a strong `ADMIN_PASSCODE`.
+3. Redeploy. The build detects Supabase and switches the site to shared mode.
+
+With real data connected, the portal has **no default passcode** and hides the demo hint: until `ADMIN_PASSCODE` is set, nobody can sign in. The "Reset demo data" button is also hidden.
+
+What the server checks on every booking: the journey exists, the traveller count and month are valid, the total is never above list price (portal price overrides included), and a wheel code exists and hasn't been used. A reused or unknown code is still saved, at full price, with a note for the team. One wheel prize per email address.
 
 Rosario AI uses `claude-opus-5-5` (override with `ROSARIO_MODEL`) at low effort for quick replies, with prompt caching on the catalogue system prompt and server-side refusal fallbacks enabled. Its knowledge comes from `lib/data.ts` via `lib/concierge.ts`.
 
@@ -94,4 +108,4 @@ To add a language: add its code to `locales` and `localeMeta` in `lib/i18n/confi
 ## Content to review before launch
 **Booking conditions, privacy policy and travel essentials are sample text**: sensible defaults for a Bolivian operator, but have them checked by a lawyer and update the visa notes for your main markets before taking real deposits.
 
-The founder story, statistics, studio addresses, testimonials and prices are placeholder copy written for the design — replace them with Rosario's real details in `lib/data.ts`, `app/(site)/about/page.tsx` and `app/(site)/contact/page.tsx`.
+The founder story, statistics, studio addresses, testimonials and prices are placeholder copy written for the design — replace them with Rosario's real details in `lib/data.ts`, `app/[lang]/about/page.tsx` and `app/[lang]/contact/page.tsx` (plus the translations in `lib/i18n/content/`).

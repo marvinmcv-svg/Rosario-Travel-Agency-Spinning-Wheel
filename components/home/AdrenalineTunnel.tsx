@@ -13,13 +13,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
-import { adventures } from "@/lib/adventures";
+import { useI18n } from "../i18n";
 import { waLink } from "@/lib/contact";
 import { PulseMeter } from "../adventure-ui";
 
 const GAP = 1500; // px of depth between panels
 
 export default function AdrenalineTunnel() {
+  const { t, lp, content } = useI18n();
+  const adventures = content.adventures;
   const root = useRef<HTMLElement>(null);
   const world = useRef<HTMLDivElement>(null);
   const cam = useRef<HTMLDivElement>(null);
@@ -77,8 +79,8 @@ export default function AdrenalineTunnel() {
   if (flat)
     return (
       <section id="adrenaline" className="mx-auto max-w-[1600px] px-5 py-28 md:px-10">
-        <p className="eyebrow text-copper">Rosario Adrenaline</p>
-        <h2 className="font-impact mt-3 text-[clamp(2.6rem,7vw,7rem)] uppercase leading-[0.85]">Not a holiday. A pulse.</h2>
+        <p className="eyebrow text-copper">{t.tunnel.eyebrow}</p>
+        <h2 className="font-impact mt-3 text-[clamp(2.6rem,7vw,7rem)] uppercase leading-[0.85]">{t.tunnel.title} {t.tunnel.titleOutline}</h2>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {adventures.map((a) => (
             <div key={a.slug} className="relative aspect-[4/5] overflow-hidden rounded-[22px]">
@@ -109,7 +111,7 @@ export default function AdrenalineTunnel() {
               style={{ transform: `translate(-50%,-50%) translateZ(${-GAP * (adventures.length + 2)}px) scale(4)` }}
               aria-hidden
             >
-              Feel the drop
+              {t.tunnel.feel}
             </p>
             {adventures.map((a, i) => {
               const side = i % 2 === 0 ? -1 : 1;
@@ -147,14 +149,14 @@ export default function AdrenalineTunnel() {
       <div className="pointer-events-none absolute inset-0 flex flex-col justify-between px-5 py-24 md:px-10">
         <div className="mx-auto flex w-full max-w-[1600px] items-start justify-between">
           <div>
-            <p className="eyebrow text-copper">Rosario Adrenaline</p>
+            <p className="eyebrow text-copper">{t.tunnel.eyebrow}</p>
             <h2 className="font-impact mt-3 text-[clamp(2.6rem,7vw,7rem)] uppercase leading-[0.85]">
-              Not a holiday.<br />
-              <span className="text-outline">A pulse.</span>
+              {t.tunnel.title}<br />
+              <span className="text-outline">{t.tunnel.titleOutline}</span>
             </h2>
           </div>
           <div className="hidden text-right md:block">
-            <p className="eyebrow text-salt/50">Altitude</p>
+            <p className="eyebrow text-salt/50">{t.tunnel.altitude}</p>
             <p className="font-impact text-5xl tabular-nums">
               <span ref={hud}>6088</span>
               <span className="text-copper"> m</span>
@@ -162,18 +164,18 @@ export default function AdrenalineTunnel() {
           </div>
         </div>
         <div className="pointer-events-auto mx-auto flex w-full max-w-[1600px] flex-wrap items-center justify-between gap-4">
-          <p className="eyebrow text-salt/50">Scroll to drop in ↓</p>
+          <p className="eyebrow text-salt/50">{t.tunnel.scroll}</p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/adventures" className="rounded-full border border-salt/30 bg-ink/60 px-6 py-3 text-sm backdrop-blur transition hover:border-copper hover:text-copper-2">
-              All adventures
+            <Link href={lp("/adventures")} className="rounded-full border border-salt/30 bg-ink/60 px-6 py-3 text-sm backdrop-blur transition hover:border-copper hover:text-copper-2">
+              {t.tunnel.all}
             </Link>
             <a
-              href={waLink("Hi Rosario! I want an adrenaline trip in Bolivia 🔥 What do you recommend?")}
+              href={waLink(t.tunnel.wa)}
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-full bg-copper px-6 py-3 text-sm font-medium text-ink transition hover:bg-copper-2"
             >
-              Book on WhatsApp
+              {t.common.bookOnWhatsApp}
             </a>
           </div>
         </div>

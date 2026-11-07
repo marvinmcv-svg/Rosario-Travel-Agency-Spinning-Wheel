@@ -3,13 +3,15 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { testimonials } from "@/lib/data";
+import { useI18n } from "../i18n";
 
 /* Quotes cross-fade on a calm rhythm; the background photo is the place
    the traveller is talking about. */
 const backdrops = ["/images/uyuni-sunset.webp", "/images/titicaca-dawn.webp", "/images/machu-picchu-terraces.webp"];
 
 export default function Testimonials() {
+  const { t: dict, content } = useI18n();
+  const testimonials = content.testimonials;
   const [i, setI] = useState(0);
   const quote = useRef<HTMLDivElement>(null);
 
@@ -38,7 +40,7 @@ export default function Testimonials() {
       ))}
       <div className="absolute inset-0 bg-ink/70" />
       <div className="relative mx-auto w-full max-w-5xl text-center">
-        <p className="eyebrow mb-10 text-gold">In their words</p>
+        <p className="eyebrow mb-10 text-gold">{dict.testimonials.eyebrow}</p>
         <div ref={quote} key={i}>
           <blockquote className="font-display text-[clamp(1.8rem,3.8vw,3.4rem)] leading-[1.15] tracking-[-0.02em]">“{t.quote}”</blockquote>
           <p className="mt-10 text-sm text-salt/80">
@@ -50,7 +52,7 @@ export default function Testimonials() {
             <button
               key={j}
               onClick={() => setI(j)}
-              aria-label={`Show testimonial ${j + 1}`}
+              aria-label={dict.testimonials.show.replace("{n}", String(j + 1))}
               className={`h-1.5 rounded-full transition-all duration-500 ${j === i ? "w-10 bg-salt" : "w-4 bg-salt/30"}`}
             />
           ))}

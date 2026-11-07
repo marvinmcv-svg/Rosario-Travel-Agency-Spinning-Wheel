@@ -16,13 +16,16 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { loadFrames, onFrameProgress } from "@/lib/frames";
+import { useI18n } from "./i18n";
 
 export const READY_EVENT = "rosario:ready";
 let isReady = false;
 export const siteReady = () => isReady;
 
 const critical = ["/images/uyuni-mirror.webp", "/images/titicaca-sunset.webp"];
-const MAX_WAIT = 12000;
+const MAX_WAIT = 7000; // never hold a visitor longer than this
+const FRAME_WAIT = 4000; // the film keeps loading in the background after this
+const SEEN_KEY = "rosario.intro.seen"; // the full flyover plays once per browser session
 
 /** The wordmark. Shared by the preloader and the hero so the hand-off is seamless. */
 export function Wordmark({ className = "" }: { className?: string }) {
@@ -99,10 +102,18 @@ export default function Preloader() {
   const bar = useRef<HTMLDivElement>(null);
   const skipRef = useRef<() => void>(() => {});
   const [gone, setGone] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     const target = document.querySelector<HTMLElement>("[data-hero-brand]");
-    if (isReady) {
+    let seen = false;
+    try {
+      seen = sessionStorage.getItem(SEEN_KEY) === "1";
+      sessionStorage.setItem(SEEN_KEY, "1");
+    } catch {}
+    if (isReady || seen) {
+      // Returning in this session: straight to the hero (it checks siteReady()).
+      isReady = true;
       setGone(true);
       return;
     }
@@ -145,7 +156,8 @@ export default function Preloader() {
           }),
       ),
     );
-    const loaded = Promise.race([Promise.all([loadFrames(), imgs]), new Promise((r) => setTimeout(r, MAX_WAIT))]);
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const loaded = Promise.race([Promise.all([imgs, Promise.race([loadFrames(), wait(FRAME_WAIT)])]), wait(MAX_WAIT)]);
 
     /* ── the flight path: a gentle climb from lower-left to upper-right ── */
     const F = { p: 0 };
@@ -266,7 +278,7 @@ export default function Preloader() {
   if (gone) return null;
 
   return (
-    <div ref={root} className="fixed inset-0 z-[100] overflow-hidden" aria-live="polite" aria-label="Loading Rosario Travels">
+    <div ref={root} className="fixed inset-0 z-[100] overflow-hidden" aria-live="polite" aria-label={t.intro.loading}>
       {/* Sky */}
       <div ref={sky} className="absolute inset-0 bg-[linear-gradient(180deg,#07080b_0%,#141218_38%,#3b1c18_66%,#8a3f1e_86%,#c4703f_100%)]">
         <div className="absolute bottom-[14%] left-1/2 h-[46vmin] w-[46vmin] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,200,140,0.55),rgba(217,139,91,0.18)_45%,transparent_70%)]" />
@@ -315,13 +327,13 @@ export default function Preloader() {
       <div className="pointer-events-none relative flex h-full flex-col justify-between px-6 py-8 md:px-12 md:py-10">
         <div className="flex items-center justify-between" data-pl-fade>
           <span data-pl-intro className="eyebrow flex items-center gap-2 text-salt/60">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-copper" /> Flight RT-591 · La Paz → The Andes
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-copper" /> {t.intro.flight}
           </span>
-          <span data-pl-intro className="eyebrow hidden text-salt/45 md:block">Now boarding</span>
+          <span data-pl-intro className="eyebrow hidden text-salt/45 md:block">{t.intro.boarding}</span>
         </div>
         <div data-pl-fade className="flex items-end justify-between gap-6">
           <button onClick={() => skipRef.current()} className="eyebrow pointer-events-auto w-fit text-salt/45 transition hover:text-salt">
-            Skip intro →
+            {t.intro.skip}
           </button>
           <div className="w-40 md:w-56">
             <div className="flex items-baseline justify-end gap-1 font-display text-2xl tabular-nums text-salt/80">

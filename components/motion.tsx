@@ -165,9 +165,10 @@ export function ScrubWords({ text, className }: { text: string; className?: stri
   }, [text]);
   return (
     <p ref={ref} className={className}>
-      {text.split(" ").map((w, i) => (
+      {/* Languages written without spaces (Chinese) light up character by character. */}
+      {(/[\u3400-\u9fff]/.test(text) ? Array.from(text) : text.split(" ").map((w) => w + " ")).map((w, i) => (
         <span key={i} className="inline-block whitespace-pre opacity-[0.14]">
-          {w}{" "}
+          {w}
         </span>
       ))}
     </p>
@@ -179,7 +180,7 @@ export function Counter({ to, suffix = "", prefix = "", className }: { to: numbe
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const fmt = (n: number) => prefix + Math.round(n).toLocaleString("en-US") + suffix;
+    const fmt = (n: number) => prefix + Math.round(n).toLocaleString(document.documentElement.lang || "en-US") + suffix;
     if (prefersReducedMotion()) {
       el.textContent = fmt(to);
       return;

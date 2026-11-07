@@ -5,14 +5,17 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { gsap, ScrollTrigger, SplitText, prefersReducedMotion } from "@/lib/gsap";
-import { destinations, heroSlides } from "@/lib/data";
+import { heroSlides } from "@/lib/data";
+import { useI18n } from "../i18n";
+import { fmt } from "@/lib/i18n/fmt";
 import { READY_EVENT, siteReady, Wordmark } from "../Preloader";
 import { openConcierge } from "../concierge-bus";
 
-const slides = heroSlides.map((s) => destinations.find((d) => d.slug === s)!);
 const DURATION = 7; // seconds per destination
 
 export default function HeroCarousel() {
+  const { t, lp, num, content } = useI18n();
+  const slides = heroSlides.map((s) => content.destinations.find((d) => d.slug === s)!);
   const root = useRef<HTMLElement>(null);
   const [index, setIndex] = useState(0);
   const current = useRef(0);
@@ -107,7 +110,7 @@ export default function HeroCarousel() {
           duration: 1.6,
           ease: "power3.inOut",
           onUpdate: () => {
-            if (altitude.current) altitude.current.textContent = Math.round(alt.current.v).toLocaleString("en-US");
+            if (altitude.current) altitude.current.textContent = num(Math.round(alt.current.v));
           },
         },
         0.2,
@@ -243,7 +246,7 @@ export default function HeroCarousel() {
   const s = slides[index];
 
   return (
-    <section ref={root} className="relative h-[100svh] min-h-[640px] w-full overflow-hidden bg-ink" aria-roledescription="carousel" aria-label="Featured destinations">
+    <section ref={root} className="relative h-[100svh] min-h-[640px] w-full overflow-hidden bg-ink" aria-roledescription="carousel" aria-label={t.hero.carousel}>
       {/* Photographs */}
       <div data-aperture className="absolute inset-0 will-change-[clip-path]">
         <div data-parallax className="absolute inset-[-3%]">
@@ -267,7 +270,7 @@ export default function HeroCarousel() {
         <div className="mx-auto max-w-[1600px] px-5 md:px-10">
           <h1 data-hero-brand className="w-fit [text-shadow:0_2px_30px_rgb(10_11_12/0.5)]">
             <Wordmark className="block text-[clamp(1.9rem,3.6vw,3.4rem)] text-salt" />
-            <span className="sr-only"> — private journeys through the Andes and South America</span>
+            <span className="sr-only">{t.hero.brandSr}</span>
           </h1>
         </div>
       </div>
@@ -289,19 +292,19 @@ export default function HeroCarousel() {
               </p>
               <div data-fade className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
-                  href={`/destinations/${d.slug}`}
+                  href={lp(`/destinations/${d.slug}`)}
                   tabIndex={i === index ? 0 : -1}
                   className="group inline-flex items-center gap-3 rounded-full bg-salt px-6 py-3.5 text-sm font-medium text-ink transition hover:bg-copper"
                 >
-                  Discover {d.name}
+                  {fmt(t.hero.discover, { name: d.name })}
                   <ArrowUpRight className="h-4 w-4 transition group-hover:rotate-45" />
                 </Link>
                 <button
                   tabIndex={i === index ? 0 : -1}
-                  onClick={() => openConcierge(`I'd love to visit ${d.name}. What would you recommend?`)}
+                  onClick={() => openConcierge(fmt(t.hero.askAbout, { name: d.name }))}
                   className="rounded-full border border-salt/30 px-6 py-3.5 text-sm backdrop-blur-sm transition hover:border-salt hover:bg-salt/10"
                 >
-                  Ask Rosario AI
+                  {t.common.askRosarioAI}
                 </button>
               </div>
             </div>
@@ -311,13 +314,13 @@ export default function HeroCarousel() {
 
       {/* Right-hand instrument panel: altitude & coordinates */}
       <div data-chrome className="pointer-events-none absolute right-5 top-1/2 z-10 hidden -translate-y-1/2 text-right [text-shadow:0_1px_18px_rgb(10_11_12/0.55)] md:right-10 md:block">
-        <p className="eyebrow text-salt/55">Altitude</p>
+        <p className="eyebrow text-salt/55">{t.hero.altitude}</p>
         <p className="mt-2 font-display text-6xl tabular-nums leading-none">
-          <span ref={altitude}>{slides[0].altitude.toLocaleString("en-US")}</span>
+          <span ref={altitude}>{num(slides[0].altitude)}</span>
           <span className="ml-1 text-2xl text-salt/60">m</span>
         </p>
         <p className="mt-4 text-xs tracking-wider text-salt/60">{s.coords}</p>
-        <p className="mt-1 text-xs tracking-wider text-salt/45">Best: {s.bestTime.split("·")[0]}</p>
+        <p className="mt-1 text-xs tracking-wider text-salt/45">{t.hero.best}: {s.bestTime.split("·")[0]}</p>
       </div>
 
       {/* Bottom rail: counter, named progress bars, arrows */}
@@ -329,7 +332,7 @@ export default function HeroCarousel() {
           </p>
           <div className="hidden flex-1 grid-cols-7 gap-4 md:grid">
             {slides.map((d, i) => (
-              <button key={d.slug} onClick={() => go(i, i > index ? 1 : -1)} className="group text-left" aria-label={`Show ${d.name}`}>
+              <button key={d.slug} onClick={() => go(i, i > index ? 1 : -1)} className="group text-left" aria-label={fmt(t.hero.show, { name: d.name })}>
                 <span className="relative block h-px w-full overflow-hidden bg-salt/20">
                   <span data-bar className="absolute inset-0 origin-left scale-x-0 bg-salt" />
                 </span>
@@ -348,14 +351,14 @@ export default function HeroCarousel() {
             <button
               onClick={() => go((index - 1 + slides.length) % slides.length, -1)}
               className="flex h-11 w-11 items-center justify-center rounded-full border border-salt/25 transition hover:bg-salt hover:text-ink"
-              aria-label="Previous destination"
+              aria-label={t.hero.prev}
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
             <button
               onClick={() => go((index + 1) % slides.length, 1)}
               className="flex h-11 w-11 items-center justify-center rounded-full border border-salt/25 transition hover:bg-salt hover:text-ink"
-              aria-label="Next destination"
+              aria-label={t.hero.nextDest}
             >
               <ArrowRight className="h-4 w-4" />
             </button>
@@ -365,7 +368,7 @@ export default function HeroCarousel() {
 
       {/* Scroll cue */}
       <div data-chrome className="pointer-events-none absolute bottom-28 right-5 z-10 hidden items-center gap-3 md:right-10 md:flex">
-        <span className="eyebrow text-salt/55">Scroll to begin the journey</span>
+        <span className="eyebrow text-salt/55">{t.hero.scroll}</span>
         <span className="relative block h-10 w-px overflow-hidden bg-salt/20">
           <span className="absolute inset-x-0 top-0 h-1/2 animate-[cue_2s_ease-in-out_infinite] bg-salt" />
         </span>

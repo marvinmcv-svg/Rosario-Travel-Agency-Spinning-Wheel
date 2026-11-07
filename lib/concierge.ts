@@ -2,6 +2,8 @@
    and by the offline concierge when no API key is configured. */
 import { destinations, journeys, formatPrice } from "./data";
 import { essentials, essentialsForPrompt } from "./essentials";
+import type { Dictionary } from "./i18n/dictionaries/en";
+import type { Content } from "./i18n/content/types";
 
 export const SYSTEM_PROMPT = `You are Rosario, the AI travel concierge of Rosario Travels — a premium, privately-guided travel company founded in La Paz, Bolivia, with studios in Cusco and Santiago. You help travellers dream up and plan journeys through the Andes and South America.
 
@@ -87,4 +89,46 @@ export function offlineReply(input: string): string {
     return "Hola, and welcome. Tell me a little about the journey you imagine — the month, how many of you, and whether you're drawn more to salt flats, sacred lakes, Inca citadels or Patagonian peaks — and I'll suggest a route.";
   }
   return "That's a lovely question. I can help with seasons, altitude, itineraries and our journeys across Bolivia, Peru, Chile, Argentina and Brazil. Could you tell me when you'd like to travel and what draws you — the Salar de Uyuni, Lake Titicaca, Machu Picchu or somewhere wilder?";
+}
+
+
+/* ── Offline concierge in the visitor's language ──────────────────
+   Same idea as offlineReply, driven by the language's dictionary
+   keywords and its translated travel essentials and catalogue. */
+
+export function localizedOfflineReply(input: string, t: Dictionary, content: Content, money: (usd: number) => string): string {
+  const q = input.toLowerCase();
+  const O = t.offline;
+  const has = (words: string[]) => words.some((w) => q.includes(w.toLowerCase()));
+  const fill = (s: string, v: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (m, k) => (k in v ? String(v[k]) : m));
+
+  const dest = content.destinations.find((d) =>
+    [d.name, d.slug.replace(/-/g, " "), ...d.name.split(" ")].some((n) => n.length > 3 && q.includes(n.toLowerCase())),
+  );
+  for (const id of ["altitude", "entry", "health", "packing", "money", "booking", "seasons"] as const) {
+    const words = O.keywords[id];
+    if (!has(words)) continue;
+    if (id === "seasons" && dest && dest.slug !== "salar-de-uyuni") break; // "when to visit X" → the destination answer below
+    const topic = content.essentials.find((e) => e.id === id);
+    if (!topic) continue;
+    const asked = words.filter((w) => q.includes(w.toLowerCase()));
+    const hit =
+      topic.items.find((i) => asked.some((w) => i.q.toLowerCase().includes(w.toLowerCase()))) ??
+      topic.items.find((i) => asked.some((w) => i.a.toLowerCase().includes(w.toLowerCase()))) ??
+      topic.items[0];
+    return `${hit.a}\n\n${O.more}`;
+  }
+  if (dest) return fill(O.dest, { name: dest.name, tagline: dest.tagline, summary: dest.summary, best: dest.bestTime, slug: dest.slug });
+  if (has(O.keywords.price)) {
+    const sorted = [...content.journeys].sort((a, b) => a.priceFrom - b.priceFrom);
+    const lo = sorted[0];
+    const hi = sorted[sorted.length - 1];
+    return fill(O.price, { min: money(lo.priceFrom), minTitle: lo.title, max: money(hi.priceFrom), maxTitle: hi.title });
+  }
+  if (has(O.keywords.plan)) {
+    const picks = content.journeys.filter((j) => j.featured).concat(content.journeys).slice(0, 3);
+    return fill(O.plan, { list: picks.map((j) => `${j.title} (/journeys/${j.slug})`).join(" · ") });
+  }
+  if (has(O.keywords.hello)) return O.hello;
+  return O.fallback;
 }

@@ -5,17 +5,11 @@ import { waLink } from "@/lib/contact";
 
 import { useMemo, useState } from "react";
 import { Minus, Plus } from "lucide-react";
-import { formatPrice } from "@/lib/data";
+import { fmt } from "@/lib/i18n/fmt";
+import { BOOKING_TERMS } from "@/lib/essentials";
+import { useI18n } from "./i18n";
 import { actions, useDB, useJourneys, type Booking } from "@/lib/store";
 import AskRosario from "./AskRosario";
-
-/* Monthly departures for the next 14 months. */
-const months = Array.from({ length: 14 }, (_, i) => {
-  const d = new Date();
-  d.setDate(1);
-  d.setMonth(d.getMonth() + i + 1);
-  return { value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, label: d.toLocaleDateString("en-US", { month: "long", year: "numeric" }) };
-});
 
 /* Turn a wheel prize into a price adjustment. */
 function discountFor(label: string, subtotal: number): number {
@@ -26,7 +20,20 @@ function discountFor(label: string, subtotal: number): number {
   return 0;
 }
 
+/* Monthly departures for the next 14 months, labelled in the visitor's language. */
+function departureMonths(intl: string) {
+  return Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + i + 1);
+    return { value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, label: d.toLocaleDateString(intl, { month: "long", year: "numeric" }) };
+  });
+}
+
 export default function BookingPanel({ slug }: { slug: string }) {
+  const { t, lp, intl, price } = useI18n();
+  const B = t.booking;
+  const months = useMemo(() => departureMonths(intl), [intl]);
   const journey = useJourneys().find((j) => j.slug === slug)!;
   const leads = useDB((db) => db.leads);
   const [travellers, setTravellers] = useState(2);
@@ -44,22 +51,22 @@ export default function BookingPanel({ slug }: { slug: string }) {
   if (step === "done" && booking) {
     return (
       <div className="rounded-[24px] border border-gold/30 bg-ink-2 p-8">
-        <p className="eyebrow text-gold">Request received</p>
-        <p className="mt-3 font-display text-4xl">Thank you, {booking.name.split(" ")[0]}.</p>
+        <p className="eyebrow text-gold">{B.received}</p>
+        <p className="mt-3 font-display text-4xl">{fmt(B.thanks, { name: booking.name.split(" ")[0] })}</p>
         <p className="mt-4 leading-relaxed text-salt/70">
-          Your reference is <span className="font-mono text-salt">{booking.id}</span>. A journey designer will write within 24 hours to shape {journey.title} around you. Nothing is charged until you confirm.
+          {fmt(B.reference, { ref: booking.id, title: journey.title })}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a
-            href={waLink(`Hi Rosario! I just requested ${journey.title} (ref ${booking.id}) for ${booking.travellers} travellers. Can we confirm on WhatsApp?`)}
+            href={waLink(fmt(B.confirmWaText, { title: journey.title, ref: booking.id, n: booking.travellers }))}
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-full bg-[#25d366] px-5 py-3 text-sm font-medium text-[#07280f]"
           >
-            Confirm on WhatsApp
+            {B.confirmWa}
           </a>
-          <Link href={`/payments?ref=${booking.id}&amount=${Math.round(booking.total * 0.3)}`} className="rounded-full border border-salt/25 px-5 py-3 text-sm transition hover:border-copper">
-            Pay 30% deposit by QR
+          <Link href={lp(`/payments?ref=${booking.id}&amount=${Math.round((booking.total * BOOKING_TERMS.depositPct) / 100)}`)} className="rounded-full border border-salt/25 px-5 py-3 text-sm transition hover:border-copper">
+            {B.payDeposit}
           </Link>
         </div>
       </div>
@@ -68,30 +75,30 @@ export default function BookingPanel({ slug }: { slug: string }) {
 
   return (
     <div className="rounded-[24px] border border-line bg-ink-2 p-7">
-      <p className="eyebrow text-salt/50">Reserve this journey</p>
+      <p className="eyebrow text-salt/50">{B.reserve}</p>
       <p className="mt-3 text-sm text-salt/60">
-        from <span className="font-display text-4xl text-salt">{formatPrice(journey.priceFrom)}</span> per traveller
+        {t.common.from} <span className="font-display text-4xl text-salt">{price(journey.priceFrom)}</span> {t.common.perTraveller}
       </p>
       {typeof journey.spotsLeft === "number" && journey.spotsLeft > 0 && (
-        <p className="mt-2 text-xs text-gold">Only {journey.spotsLeft} places left on next departure</p>
+        <p className="mt-2 text-xs text-gold">{fmt(B.spotsLeft, { n: journey.spotsLeft })}</p>
       )}
 
       {step === "quote" && (
         <div className="mt-7 space-y-6">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-salt/70">Travellers</span>
+            <span className="text-sm text-salt/70">{B.travellers}</span>
             <div className="flex items-center gap-4">
-              <button onClick={() => setTravellers((t) => Math.max(1, t - 1))} className="flex h-9 w-9 items-center justify-center rounded-full border border-salt/20 hover:border-salt" aria-label="Fewer travellers">
+              <button onClick={() => setTravellers((t) => Math.max(1, t - 1))} className="flex h-9 w-9 items-center justify-center rounded-full border border-salt/20 hover:border-salt" aria-label={B.fewer}>
                 <Minus className="h-3.5 w-3.5" />
               </button>
               <span className="w-6 text-center font-display text-2xl tabular-nums">{travellers}</span>
-              <button onClick={() => setTravellers((t) => Math.min(journey.maxGroup, t + 1))} className="flex h-9 w-9 items-center justify-center rounded-full border border-salt/20 hover:border-salt" aria-label="More travellers">
+              <button onClick={() => setTravellers((t) => Math.min(journey.maxGroup, t + 1))} className="flex h-9 w-9 items-center justify-center rounded-full border border-salt/20 hover:border-salt" aria-label={B.more}>
                 <Plus className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
           <label className="block">
-            <span className="text-sm text-salt/70">Departure month</span>
+            <span className="text-sm text-salt/70">{B.month}</span>
             <select value={month} onChange={(e) => setMonth(e.target.value)} className="field">
               {months.map((m) => (
                 <option key={m.value} value={m.value}>{m.label}</option>
@@ -99,36 +106,36 @@ export default function BookingPanel({ slug }: { slug: string }) {
             </select>
           </label>
           <label className="block">
-            <span className="text-sm text-salt/70">Spin the Andes code</span>
+            <span className="text-sm text-salt/70">{B.promo}</span>
             <input value={promo} onChange={(e) => setPromo(e.target.value)} placeholder="ANDES-XXXX" className="field font-mono uppercase" />
             {promo && (
               <span className={`mt-2 block text-xs ${lead ? "text-gold" : "text-salt/40"}`}>
-                {lead ? `Applied: ${lead.prizeLabel}` : "Code not recognised (or already used)"}
+                {lead ? fmt(B.applied, { prize: lead.prizeLabel }) : B.notRecognised}
               </span>
             )}
           </label>
           <div className="space-y-2 border-t border-line pt-5 text-sm">
             <div className="flex justify-between text-salt/60">
-              <span>{travellers} × {formatPrice(journey.priceFrom)}</span>
-              <span>{formatPrice(subtotal)}</span>
+              <span>{travellers} × {price(journey.priceFrom)}</span>
+              <span>{price(subtotal)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-gold">
                 <span>{lead?.prizeLabel}</span>
-                <span>−{formatPrice(discount)}</span>
+                <span>−{price(discount)}</span>
               </div>
             )}
-            {lead && discount === 0 && <div className="text-gold">{lead.prizeLabel} added to your journey</div>}
+            {lead && discount === 0 && <div className="text-gold">{fmt(B.added, { prize: lead.prizeLabel })}</div>}
             <div className="flex items-baseline justify-between pt-2">
-              <span>Estimated total</span>
-              <span className="font-display text-3xl">{formatPrice(total)}</span>
+              <span>{B.estimated}</span>
+              <span className="font-display text-3xl">{price(total)}</span>
             </div>
           </div>
           <button onClick={() => setStep("details")} className="w-full rounded-full bg-copper py-4 text-sm font-medium text-ink transition hover:bg-copper-2">
-            Continue
+            {B.continue}
           </button>
           <div className="flex justify-center">
-            <AskRosario prompt={`I'm interested in ${journey.title}. Can you tell me more?`} label="Questions? Ask Rosario AI" />
+            <AskRosario prompt={fmt(B.questionsPrompt, { title: journey.title })} label={B.questions} />
           </div>
         </div>
       )}
@@ -155,22 +162,28 @@ export default function BookingPanel({ slug }: { slug: string }) {
             setStep("done");
           }}
         >
-          <input required placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="field" aria-label="Full name" />
-          <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="field" aria-label="Email" />
-          <input placeholder="Phone / WhatsApp (optional)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="field" aria-label="Phone" />
-          <textarea placeholder="Anything we should know? Celebrations, dietary needs, pace…" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="field resize-none" aria-label="Notes" />
+          <input required placeholder={t.common.fullName} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="field" aria-label={t.common.fullName} />
+          <input required type="email" placeholder={t.common.email} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="field" aria-label={t.common.email} />
+          <input placeholder={B.phone} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="field" aria-label={B.phone} />
+          <textarea placeholder={B.notes} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="field resize-none" aria-label={B.notes} />
           <div className="flex items-baseline justify-between border-t border-line pt-5 text-sm">
-            <span className="text-salt/60">{travellers} {travellers === 1 ? "traveller" : "travellers"} · {months.find((m) => m.value === month)?.label}</span>
-            <span className="font-display text-2xl">{formatPrice(total)}</span>
+            <span className="text-salt/60">{travellers} {travellers === 1 ? t.common.traveller : t.common.travellers} · {months.find((m) => m.value === month)?.label}</span>
+            <span className="font-display text-2xl">{price(total)}</span>
           </div>
-          <button className="w-full rounded-full bg-copper py-4 text-sm font-medium text-ink transition hover:bg-copper-2">Request this journey</button>
+          <button className="w-full rounded-full bg-copper py-4 text-sm font-medium text-ink transition hover:bg-copper-2">{B.request}</button>
           <button type="button" onClick={() => setStep("quote")} className="w-full text-xs text-salt/50 hover:text-salt">
-            ← Back
+            ← {t.common.back}
           </button>
           <p className="text-center text-[0.7rem] leading-relaxed text-salt/40">
-            No payment now. A designer confirms availability and sends a tailored proposal. By sending this request you agree to our{" "}
-            <Link href="/terms" className="underline underline-offset-2 hover:text-salt">booking conditions</Link> and{" "}
-            <Link href="/privacy" className="underline underline-offset-2 hover:text-salt">privacy policy</Link>.
+            {B.legal.split(/(\{terms\}|\{privacy\})/).map((part, i) =>
+              part === "{terms}" ? (
+                <Link key={i} href={lp("/terms")} className="underline underline-offset-2 hover:text-salt">{B.terms}</Link>
+              ) : part === "{privacy}" ? (
+                <Link key={i} href={lp("/privacy")} className="underline underline-offset-2 hover:text-salt">{B.privacy}</Link>
+              ) : (
+                part
+              ),
+            )}
           </p>
         </form>
       )}

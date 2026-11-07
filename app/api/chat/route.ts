@@ -1,5 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { SYSTEM_PROMPT, offlineReply } from "@/lib/concierge";
+import { SYSTEM_PROMPT, localizedOfflineReply, offlineReply } from "@/lib/concierge";
+import { defaultLocale, hasLocale, localeMeta, type Locale } from "@/lib/i18n/config";
+import { getI18n } from "@/lib/i18n/server";
 
 export const runtime = "nodejs";
 
@@ -26,8 +28,10 @@ function streamText(text: string, mode: "claude" | "offline") {
 
 export async function POST(req: Request) {
   let messages: Incoming[];
+  let lang: Locale = defaultLocale;
   try {
     const json = await req.json();
+    if (hasLocale(json.lang)) lang = json.lang;
     messages = (json.messages as Incoming[])
       .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
       .slice(-20)
@@ -40,7 +44,13 @@ export async function POST(req: Request) {
   }
 
   const last = messages[messages.length - 1].content;
-  if (!process.env.ANTHROPIC_API_KEY) return streamText(offlineReply(last), "offline");
+  const offline = async () => {
+    if (lang === defaultLocale) return offlineReply(last);
+    const { t, content } = await getI18n(lang);
+    const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+    return localizedOfflineReply(last, t, content, usd);
+  };
+  if (!process.env.ANTHROPIC_API_KEY) return streamText(await offline(), "offline");
 
   const client = new Anthropic();
 
@@ -56,7 +66,11 @@ export async function POST(req: Request) {
           betas: ["server-side-fallback-2026-07-01"],
           fallbacks: "default",
           // Stable system prompt → cached across every conversation.
-          system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+          // The visitor's language goes after the cached block so the cache is shared by every language.
+          system: [
+            { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
+            { type: "text", text: `The visitor is browsing the ${localeMeta[lang].english} version of the site. Always reply in ${localeMeta[lang].english}, whatever language the catalogue above is written in. Keep destination and journey names as they appear, and keep page links (such as /journeys/andean-odyssey) unchanged.` },
+          ],
           messages,
         });
         for await (const event of stream) {
@@ -71,7 +85,7 @@ export async function POST(req: Request) {
       } catch (err) {
         // Network/API failure: degrade to the offline concierge instead of an error.
         console.error("Rosario AI error", err instanceof Anthropic.APIError ? `${err.status} ${err.message}` : err);
-        controller.enqueue(encoder.encode(offlineReply(last)));
+        controller.enqueue(encoder.encode(await offline()));
       } finally {
         controller.close();
       }

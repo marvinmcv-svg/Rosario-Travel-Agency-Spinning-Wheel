@@ -9,32 +9,28 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCheck, ChevronLeft, Minus, MoreVertical, Plus, SendHorizontal } from "lucide-react";
-import { adventures } from "@/lib/adventures";
-import { destinations } from "@/lib/data";
 import { WHATSAPP_DISPLAY, waLink } from "@/lib/contact";
+import { fmt } from "@/lib/i18n/fmt";
+import { useI18n } from "./i18n";
 import { Tilt3D } from "./adventure-ui";
 
 type Goal = "adrenaline" | "journey" | "group" | "question";
 
-const goals: { id: Goal; title: string; text: string; reply: string; label: string }[] = [
-  { id: "adrenaline", title: "An adrenaline adventure", text: "Death Road, 6,000 m summits, sandboarding, 4×4 convoys", label: "an adrenaline adventure 🔥", reply: "Love it. Which rush are you after? 🚵" },
-  { id: "journey", title: "A signature journey", text: "Uyuni, Titicaca, Machu Picchu: private and unhurried", label: "a signature journey", reply: "Beautiful choice. Where would you like to go? 🏔️" },
-  { id: "group", title: "A group or company trip", text: "Friends, schools, team-building: we size it for you", label: "a group / company trip", reply: "We do groups of every size. Tell us more 👥" },
-  { id: "question", title: "I have a question", text: "Prices, QR payments, altitude, visas, anything", label: "help with a question", reply: "Of course! Ask us anything 💬" },
-];
-
-const months = ["Any time", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const budgets = ["< $500", "$500 – 1,500", "$1,500 – 3,000", "$3,000+"];
-const topics = ["Prices", "QR payments", "Altitude", "Visas", "Group discounts", "Other"];
-const steps = ["What you seek", "Details", "Your details", "Send"];
 
 const now = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
 export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "light" }) {
+  const { t, content } = useI18n();
+  const P = t.planner;
+  const goals = P.goals as { id: Goal; title: string; text: string; label: string; reply: string }[];
+  const months = [P.anyTime, ...P.months];
+  const topics = P.topics;
+  const steps = P.steps;
   const [step, setStep] = useState(0);
   const [goal, setGoal] = useState<Goal | null>(null);
   const [picks, setPicks] = useState<string[]>([]);
-  const [month, setMonth] = useState("Any time");
+  const [month, setMonth] = useState(P.anyTime);
   const [people, setPeople] = useState(2);
   const [budget, setBudget] = useState("");
   const [name, setName] = useState("");
@@ -48,19 +44,19 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
   const g = goals.find((x) => x.id === goal);
   const options =
     goal === "adrenaline"
-      ? adventures.map((a) => a.name)
+      ? content.adventures.map((a) => a.name)
       : goal === "question"
         ? topics
-        : destinations.map((d) => d.name);
+        : content.destinations.map((d) => d.name);
 
   const message = useMemo(() => {
-    const lines = [`Hi Rosario! 👋${name ? ` I'm ${name}` : ""}${from ? ` from ${from}` : ""}.`];
-    if (g) lines.push(`I'm looking for ${g.label}.`);
-    if (picks.length) lines.push(`${goal === "question" ? "About" : "Interested in"}: ${picks.join(", ")}.`);
-    if (goal && goal !== "question") lines.push(`When: ${month} · Travellers: ${people}${budget ? ` · Budget: ${budget} pp` : ""}.`);
+    const lines = [`${P.msgHi}${name ? fmt(P.msgName, { name }) : ""}${from ? fmt(P.msgFrom, { from }) : ""}.`];
+    if (g) lines.push(fmt(P.msgLooking, { label: g.label }));
+    if (picks.length) lines.push(`${goal === "question" ? P.msgAbout : P.msgInterested}: ${picks.join(", ")}.`);
+    if (goal && goal !== "question") lines.push(`${fmt(P.msgWhen, { month, n: people })}${budget ? fmt(P.msgBudget, { budget }) : ""}.`);
     if (note.trim()) lines.push(note.trim());
     return lines.join("\n");
-  }, [name, from, g, goal, picks, month, people, budget, note]);
+  }, [name, from, g, goal, picks, month, people, budget, note, P]);
 
   // Simulated "Rosario is typing…" after each answer.
   useEffect(() => {
@@ -127,7 +123,7 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
           {step === 1 && (
             <div className="space-y-9">
               <div>
-                <p className="eyebrow mb-4 opacity-60">{goal === "adrenaline" ? "Pick your rush" : goal === "question" ? "What's it about?" : "Where to?"} · choose any</p>
+                <p className="eyebrow mb-4 opacity-60">{goal === "adrenaline" ? P.pickRush : goal === "question" ? P.about : P.whereTo} · {P.chooseAny}</p>
                 <div className="flex flex-wrap gap-2">
                   {options.map((o) => (
                     <button key={o} onClick={() => toggle(o)} className={chip(picks.includes(o))}>
@@ -140,7 +136,7 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
                 <>
                   <div className="grid gap-8 sm:grid-cols-2">
                     <label className="block">
-                      <span className="eyebrow opacity-60">When</span>
+                      <span className="eyebrow opacity-60">{P.when}</span>
                       <select value={month} onChange={(e) => setMonth(e.target.value)} className="field mt-2">
                         {months.map((m) => (
                           <option key={m}>{m}</option>
@@ -148,20 +144,20 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
                       </select>
                     </label>
                     <div>
-                      <span className="eyebrow opacity-60">Travellers</span>
+                      <span className="eyebrow opacity-60">{P.travellers}</span>
                       <div className="mt-3 flex items-center gap-5">
-                        <button aria-label="Fewer travellers" onClick={() => setPeople((n) => Math.max(1, n - 1))} className={chip(false)}>
+                        <button aria-label={t.booking.fewer} onClick={() => setPeople((n) => Math.max(1, n - 1))} className={chip(false)}>
                           <Minus className="h-4 w-4" />
                         </button>
                         <span className="font-impact w-10 text-center text-4xl tabular-nums">{people}</span>
-                        <button aria-label="More travellers" onClick={() => setPeople((n) => Math.min(60, n + 1))} className={chip(false)}>
+                        <button aria-label={t.booking.more} onClick={() => setPeople((n) => Math.min(60, n + 1))} className={chip(false)}>
                           <Plus className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
                   </div>
                   <div>
-                    <p className="eyebrow mb-4 opacity-60">Budget per person (optional)</p>
+                    <p className="eyebrow mb-4 opacity-60">{P.budget}</p>
                     <div className="flex flex-wrap gap-2">
                       {budgets.map((b) => (
                         <button key={b} onClick={() => setBudget(budget === b ? "" : b)} className={chip(budget === b)}>
@@ -177,15 +173,15 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
 
           {step === 2 && (
             <div className="space-y-6">
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="field text-lg" aria-label="Your name" autoFocus />
-              <input value={from} onChange={(e) => setFrom(e.target.value)} placeholder="Where are you travelling from?" className="field text-lg" aria-label="Country" />
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t.common.yourName} className="field text-lg" aria-label={t.common.yourName} autoFocus />
+              <input value={from} onChange={(e) => setFrom(e.target.value)} placeholder={P.from} className="field text-lg" aria-label={P.from} />
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={3}
-                placeholder={goal === "question" ? "Your question…" : "Anything else? Fitness level, celebrations, dates…"}
+                placeholder={goal === "question" ? P.question : P.anythingElse}
                 className="field resize-none text-lg"
-                aria-label="Message"
+                aria-label={P.messageField}
               />
             </div>
           )}
@@ -193,10 +189,10 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
           {step === 3 && (
             <div>
               <p className="font-impact text-[clamp(2.4rem,5vw,4.5rem)] uppercase leading-[0.9]">
-                Ready for take-off{name ? `, ${name.split(" ")[0]}` : ""}.
+                {fmt(P.ready, { name: name ? `, ${name.split(" ")[0]}` : "" })}
               </p>
               <p className={`mt-4 max-w-md ${light ? "text-ink/65" : "text-salt/65"}`}>
-                Your message is ready. Tap send and WhatsApp opens a chat with our team at {WHATSAPP_DISPLAY}. A real person replies, usually within minutes.
+                {fmt(P.readyText, { phone: WHATSAPP_DISPLAY })}
               </p>
               <a
                 href={waLink(message)}
@@ -204,7 +200,7 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
                 rel="noopener noreferrer"
                 className="group mt-9 inline-flex items-center gap-4 rounded-full bg-[#25d366] py-4 pl-8 pr-4 text-base font-medium text-[#07280f] shadow-[0_20px_60px_-15px_rgba(37,211,102,0.6)] transition hover:scale-[1.03]"
               >
-                Send on WhatsApp
+                {P.send}
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#07280f] text-[#25d366] transition group-hover:translate-x-1">
                   <SendHorizontal className="h-4 w-4" />
                 </span>
@@ -216,7 +212,7 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
         {/* nav */}
         <div className={`mt-8 flex items-center justify-between border-t pt-6 ${light ? "border-ink/15" : "border-line"}`}>
           <button onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0} className="flex items-center gap-2 text-sm opacity-60 transition hover:opacity-100 disabled:invisible">
-            <ArrowLeft className="h-4 w-4" /> Back
+            <ArrowLeft className="h-4 w-4" /> {t.common.back}
           </button>
           {step < 3 && (
             <button
@@ -224,7 +220,7 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
               disabled={!canNext}
               className="flex items-center gap-3 bg-copper px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] text-ink transition hover:bg-copper-2 disabled:opacity-30"
             >
-              Next <ArrowRight className="h-4 w-4" />
+              {t.common.next} <ArrowRight className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -240,19 +236,19 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-copper font-display text-lg text-ink">R</span>
               <div className="flex-1">
                 <p className="text-[0.95rem] font-medium">Rosario Travels</p>
-                <p className="text-xs opacity-60">{typing ? "typing…" : "online"}</p>
+                <p className="text-xs opacity-60">{typing ? P.typing : P.online}</p>
               </div>
               <MoreVertical className="h-5 w-5 opacity-70" />
             </div>
             <div ref={chat} className="flex flex-1 flex-col gap-2 overflow-y-auto px-3 py-4 text-[0.88rem] leading-snug [background:radial-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)_0_0/18px_18px]" data-lenis-prevent>
-              <span className="mx-auto mb-2 rounded-md bg-[#1f2c34] px-3 py-1 text-[0.7rem] uppercase tracking-wide opacity-70">Today</span>
-              <Bubble time={time}>¡Hola! 👋 This is Rosario. Tell us what you&apos;re dreaming of and we&apos;ll reply right away 🏔️</Bubble>
-              {g && <Bubble me time={time}>I&apos;m looking for {g.label}</Bubble>}
+              <span className="mx-auto mb-2 rounded-md bg-[#1f2c34] px-3 py-1 text-[0.7rem] uppercase tracking-wide opacity-70">{P.today}</span>
+              <Bubble time={time}>{P.greeting}</Bubble>
+              {g && <Bubble me time={time}>{fmt(P.lookingFor, { label: g.label })}</Bubble>}
               {g && step >= 1 && !typing && <Bubble time={time}>{g.reply}</Bubble>}
               {step >= 2 && picks.length > 0 && <Bubble me time={time}>{picks.join(" · ")}</Bubble>}
               {step >= 2 && goal !== "question" && (
                 <Bubble me time={time}>
-                  {month} · {people} {people === 1 ? "traveller" : "travellers"}
+                  {month} · {people} {people === 1 ? t.common.traveller : t.common.travellers}
                   {budget ? ` · ${budget}` : ""}
                 </Bubble>
               )}
@@ -270,12 +266,12 @@ export default function WhatsAppPlanner({ tone = "dark" }: { tone?: "dark" | "li
               )}
             </div>
             <div className="flex items-center gap-2 p-3">
-              <div className="flex-1 truncate rounded-full bg-[#1f2c34] px-4 py-3 text-sm opacity-60">{step === 3 ? "Ready to send ✓" : "Message"}</div>
+              <div className="flex-1 truncate rounded-full bg-[#1f2c34] px-4 py-3 text-sm opacity-60">{step === 3 ? P.readyToSend : P.messageField}</div>
               <a
                 href={step === 3 ? waLink(message) : undefined}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Send on WhatsApp"
+                aria-label={P.send}
                 onClick={(e) => step < 3 && (e.preventDefault(), canNext && setStep((s) => s + 1))}
                 className="flex h-12 w-12 items-center justify-center rounded-full bg-[#25d366] text-[#07280f]"
               >

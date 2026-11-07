@@ -4,17 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { destinations, formatPrice } from "@/lib/data";
+import { fmt } from "@/lib/i18n/fmt";
+import { Price, useI18n } from "./i18n";
 import { useJourneys } from "@/lib/store";
 import { FadeUp } from "./motion";
 
 const styles = ["All", "Signature", "Private", "Cultural", "Expedition"] as const;
-const sorts = { featured: "Featured", short: "Shortest first", price: "Price: low to high" } as const;
+const sortKeys = ["featured", "short", "price"] as const;
 
 export default function JourneyList() {
   const all = useJourneys();
   const [style, setStyle] = useState<(typeof styles)[number]>("All");
-  const [sort, setSort] = useState<keyof typeof sorts>("featured");
+  const [sort, setSort] = useState<(typeof sortKeys)[number]>("featured");
+  const { t, lp, content } = useI18n();
+  const J = t.journeys;
 
   const list = useMemo(() => {
     const l = all.filter((j) => j.published && (style === "All" || j.style === style));
@@ -34,15 +37,15 @@ export default function JourneyList() {
               onClick={() => setStyle(s)}
               className={`rounded-full border px-5 py-2.5 text-sm transition ${style === s ? "border-salt bg-salt text-ink" : "border-salt/20 text-salt/70 hover:border-salt/60"}`}
             >
-              {s}
+              {s === "All" ? J.all : t.common.styles[s]}
             </button>
           ))}
         </div>
         <label className="flex items-center gap-3 text-sm text-salt/60">
-          Sort
-          <select value={sort} onChange={(e) => setSort(e.target.value as keyof typeof sorts)} className="field w-auto py-2">
-            {Object.entries(sorts).map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
+          {J.sort}
+          <select value={sort} onChange={(e) => setSort(e.target.value as (typeof sortKeys)[number])} className="field w-auto py-2">
+            {sortKeys.map((k) => (
+              <option key={k} value={k}>{J.sorts[k]}</option>
             ))}
           </select>
         </label>
@@ -51,28 +54,28 @@ export default function JourneyList() {
       <div className="space-y-6">
         {list.map((j, i) => (
           <FadeUp key={j.slug} delay={i * 0.04}>
-            <Link href={`/journeys/${j.slug}`} className="group grid overflow-hidden rounded-[26px] border border-line bg-ink-2 transition hover:border-salt/30 md:grid-cols-[1.1fr_1fr]">
+            <Link href={lp(`/journeys/${j.slug}`)} className="group grid overflow-hidden rounded-[26px] border border-line bg-ink-2 transition hover:border-salt/30 md:grid-cols-[1.1fr_1fr]">
               <div className="relative aspect-[16/10] overflow-hidden md:aspect-auto md:min-h-[380px]">
                 <Image src={j.image} alt={j.title} fill sizes="(min-width:768px) 55vw, 100vw" className="object-cover transition duration-[1.6s] ease-[var(--ease-expo)] group-hover:scale-105" />
-                <span className="absolute left-5 top-5 rounded-full bg-ink/60 px-3 py-1 text-xs backdrop-blur">{j.style}</span>
+                <span className="absolute left-5 top-5 rounded-full bg-ink/60 px-3 py-1 text-xs backdrop-blur">{t.common.styles[j.style]}</span>
               </div>
               <div className="flex flex-col justify-between gap-8 p-7 md:p-10">
                 <div>
-                  <p className="eyebrow text-salt/45">{j.days} days · {j.difficulty} · max {j.maxGroup} travellers</p>
+                  <p className="eyebrow text-salt/45">{fmt(J.meta, { days: j.days, difficulty: t.common.difficulty[j.difficulty], n: j.maxGroup })}</p>
                   <h2 className="mt-4 font-display text-[clamp(2.2rem,3.6vw,3.6rem)] leading-none transition group-hover:italic">{j.title}</h2>
                   <p className="mt-3 text-salt/60">{j.subtitle}</p>
                   <p className="mt-6 max-w-lg leading-relaxed text-salt/70">{j.summary}</p>
                   <div className="mt-6 flex flex-wrap gap-2">
                     {j.destinations.map((s) => (
                       <span key={s} className="rounded-full border border-line px-3 py-1 text-xs text-salt/60">
-                        {destinations.find((d) => d.slug === s)?.name}
+                        {content.destinations.find((d) => d.slug === s)?.name}
                       </span>
                     ))}
                   </div>
                 </div>
                 <div className="flex items-end justify-between">
                   <p className="text-sm text-salt/55">
-                    from <span className="font-display text-4xl text-salt">{formatPrice(j.priceFrom)}</span> pp
+                    {t.common.from} <Price usd={j.priceFrom} className="font-display text-4xl text-salt" /> {t.common.pp}
                   </p>
                   <span className="flex h-12 w-12 items-center justify-center rounded-full border border-salt/20 transition duration-500 group-hover:rotate-45 group-hover:bg-copper group-hover:text-ink">
                     <ArrowUpRight className="h-5 w-5" />
@@ -82,7 +85,7 @@ export default function JourneyList() {
             </Link>
           </FadeUp>
         ))}
-        {list.length === 0 && <p className="py-20 text-center text-salt/50">No journeys in this style yet — ask Rosario AI to design one.</p>}
+        {list.length === 0 && <p className="py-20 text-center text-salt/50">{J.empty}</p>}
       </div>
     </section>
   );

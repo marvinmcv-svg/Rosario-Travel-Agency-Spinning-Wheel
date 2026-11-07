@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { formatPrice } from "@/lib/data";
+import { Price, useI18n } from "../i18n";
 import { useJourneys } from "@/lib/store";
 import { FadeUp, SplitReveal } from "../motion";
 
@@ -14,6 +14,7 @@ import { FadeUp, SplitReveal } from "../motion";
    before you commit to the click. */
 export default function SignatureJourneys() {
   const list = useJourneys().filter((j) => j.published && j.featured);
+  const { t, lp } = useI18n();
   const root = useRef<HTMLElement>(null);
   const floater = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<string | null>(null);
@@ -56,13 +57,13 @@ export default function SignatureJourneys() {
       <div className="mx-auto max-w-[1600px]">
         <div className="mb-16 grid gap-8 md:grid-cols-2 md:items-end">
           <div>
-            <p className="eyebrow mb-5 text-copper">Signature journeys</p>
+            <p className="eyebrow mb-5 text-copper">{t.signature.eyebrow}</p>
             <SplitReveal className="font-display text-[clamp(2.6rem,6vw,6rem)] leading-[0.95] tracking-[-0.03em]">
-              Designed slowly. <em className="text-salt/60">Travelled privately.</em>
+              {t.signature.title} <em className="text-salt/60">{t.signature.titleEm}</em>
             </SplitReveal>
           </div>
           <FadeUp className="max-w-md text-lg leading-relaxed text-salt/65 md:justify-self-end">
-            Every itinerary is a starting point. Your journey designer — or Rosario AI — will shape it around your dates, pace and curiosity.
+            {t.signature.text}
           </FadeUp>
         </div>
 
@@ -71,7 +72,7 @@ export default function SignatureJourneys() {
             <li key={j.slug} data-row className="relative">
               <span data-rule className="absolute inset-x-0 top-0 h-px origin-left bg-line" />
               <Link
-                href={`/journeys/${j.slug}`}
+                href={lp(`/journeys/${j.slug}`)}
                 onMouseEnter={() => setActive(j.slug)}
                 className="group grid grid-cols-12 items-center gap-4 py-8 md:py-10"
               >
@@ -88,10 +89,10 @@ export default function SignatureJourneys() {
                   <p data-cell className="mt-3 text-sm text-salt/55">{j.subtitle}</p>
                 </div>
                 <span data-cell className="col-span-4 text-sm text-salt/70 md:col-span-2">
-                  {j.days} days · {j.style}
+                  {t.common.days.replace("{n}", String(j.days))} · {t.common.styles[j.style]}
                 </span>
                 <span data-cell className="col-span-6 text-sm text-salt/70 md:col-span-2">
-                  from <span className="font-display text-2xl text-salt">{formatPrice(j.priceFrom)}</span>
+                  {t.common.from} <Price usd={j.priceFrom} className="font-display text-2xl text-salt" />
                 </span>
                 <span data-cell className="col-span-2 flex justify-end md:col-span-1">
                   <span className="flex h-12 w-12 items-center justify-center rounded-full border border-salt/20 transition duration-500 group-hover:rotate-45 group-hover:border-copper group-hover:bg-copper group-hover:text-ink">
@@ -105,8 +106,8 @@ export default function SignatureJourneys() {
         </ul>
 
         <FadeUp className="mt-14 flex justify-center">
-          <Link href="/journeys" className="rounded-full border border-salt/25 px-8 py-4 text-sm transition hover:bg-salt hover:text-ink">
-            Browse all journeys
+          <Link href={lp("/journeys")} className="rounded-full border border-salt/25 px-8 py-4 text-sm transition hover:bg-salt hover:text-ink">
+            {t.signature.browse}
           </Link>
         </FadeUp>
       </div>

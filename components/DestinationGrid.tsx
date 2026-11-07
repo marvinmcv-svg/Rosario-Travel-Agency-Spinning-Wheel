@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Flip } from "gsap/Flip";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { destinations } from "@/lib/data";
+import { useI18n } from "./i18n";
 
 if (typeof window !== "undefined") gsap.registerPlugin(Flip);
 
@@ -15,6 +15,8 @@ const filters = ["All", "Bolivia", "Peru", "Chile", "Argentina · Brazil"] as co
    see which places stayed and which left, instead of a hard re-render. */
 export default function DestinationGrid() {
   const [filter, setFilter] = useState<(typeof filters)[number]>("All");
+  const { t, lp, num, content } = useI18n();
+  const destinations = content.destinations;
   const grid = useRef<HTMLDivElement>(null);
   const flipState = useRef<Flip.FlipState | null>(null);
 
@@ -24,12 +26,12 @@ export default function DestinationGrid() {
         destinations
           .filter((d) => {
             if (filter === "All") return true;
-            if (filter === "Argentina · Brazil") return /Argentina|Brazil/.test(d.country);
-            return d.country.includes(filter);
+            if (filter === "Argentina · Brazil") return /Argentina|Brazil/.test(d.countryEn);
+            return d.countryEn.includes(filter);
           })
           .map((d) => d.slug),
       ),
-    [filter],
+    [filter, destinations],
   );
 
   const choose = (f: (typeof filters)[number]) => {
@@ -67,7 +69,7 @@ export default function DestinationGrid() {
             onClick={() => choose(f)}
             className={`rounded-full border px-5 py-2.5 text-sm transition ${filter === f ? "border-salt bg-salt text-ink" : "border-salt/20 text-salt/70 hover:border-salt/60"}`}
           >
-            {f}
+            {t.destinations.filters[f]}
           </button>
         ))}
       </div>
@@ -75,7 +77,7 @@ export default function DestinationGrid() {
         {destinations.map((d, i) => (
           <Link
             key={d.slug}
-            href={`/destinations/${d.slug}`}
+            href={lp(`/destinations/${d.slug}`)}
             data-flip
             data-flip-id={d.slug}
             className={`group ${visible.has(d.slug) ? "" : "hidden"} ${i % 3 === 1 ? "lg:mt-20" : ""}`}
@@ -84,7 +86,7 @@ export default function DestinationGrid() {
               <Image src={d.image} alt={d.name} fill sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw" className="object-cover transition duration-[1.6s] ease-[var(--ease-expo)] group-hover:scale-[1.06]" />
               <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent opacity-80 transition group-hover:opacity-100" />
               <p className="absolute bottom-5 left-5 text-xs tracking-wider text-salt/80">{d.coords}</p>
-              <p className="absolute right-5 top-5 rounded-full bg-ink/50 px-3 py-1 text-xs backdrop-blur">{d.altitude.toLocaleString("en-US")} m</p>
+              <p className="absolute right-5 top-5 rounded-full bg-ink/50 px-3 py-1 text-xs backdrop-blur">{num(d.altitude)} m</p>
             </div>
             <div className="mt-5 flex items-baseline justify-between gap-4">
               <h3 className="font-display text-4xl transition group-hover:italic">{d.name}</h3>

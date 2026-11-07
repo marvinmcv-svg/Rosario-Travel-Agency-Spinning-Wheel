@@ -13,6 +13,7 @@
 
 import { useSyncExternalStore } from "react";
 import { defaultWheelPrizes, journeys, type WheelPrize } from "./data";
+import { useI18n } from "@/components/i18n";
 
 export type BookingStatus = "new" | "confirmed" | "deposit" | "cancelled";
 export type Booking = {
@@ -308,7 +309,8 @@ export const actions = {
 /** Journeys with admin overrides applied (price, featured, published). */
 export function useJourneys() {
   const overrides = useDB((db) => db.journeyOverrides);
-  return journeys
+  const { content } = useI18n(); // localised titles & itineraries (English in the portal)
+  return content.journeys
     .map((j) => ({ ...j, ...overrides[j.slug], published: overrides[j.slug]?.published ?? true }))
     .filter(Boolean);
 }

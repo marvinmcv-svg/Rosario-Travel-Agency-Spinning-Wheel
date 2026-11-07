@@ -1,12 +1,15 @@
 "use client";
 
+import { useI18n } from "./i18n";
 import { useEffect, useRef, type ReactNode } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
 /* Five bars that read like a heart-rate monitor. */
 export function PulseMeter({ value, className = "" }: { value: number; className?: string }) {
+  const { t } = useI18n();
+  const label = t.adventures.pulse.replace("{n}", String(value));
   return (
-    <div className={`flex items-end gap-1 ${className}`} aria-label={`Adrenaline ${value} of 5`} title={`Adrenaline ${value}/5`}>
+    <div className={`flex items-end gap-1 ${className}`} role="img" aria-label={label} title={label}>
       {[1, 2, 3, 4, 5].map((n) => (
         <span
           key={n}

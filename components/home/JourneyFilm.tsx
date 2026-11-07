@@ -17,8 +17,10 @@ import { useEffect, useRef } from "react";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { getFrames, loadFrames, nearestFrame } from "@/lib/frames";
 import { journeyFilm } from "@/lib/data";
+import { useI18n } from "../i18n";
 
 export default function JourneyFilm() {
+  const { t, lp, content } = useI18n();
   const section = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -124,16 +126,16 @@ export default function JourneyFilm() {
     };
   }, []);
 
-  const route = journeyFilm.route;
+  const route = journeyFilm.route.map((r, i) => ({ ...r, name: content.film.route[i] ?? r.name }));
   const d = `M ${route[0].x} ${route[0].y} C 58 62, 50 56, ${route[1].x} ${route[1].y} S 30 30, ${route[2].x} ${route[2].y}`;
 
   return (
-    <section ref={section} id="journey" className="relative h-[520vh] bg-ink motion-reduce:h-auto" aria-label="The Andean journey film">
+    <section ref={section} id="journey" className="relative h-[520vh] bg-ink motion-reduce:h-auto" aria-label={t.film.label}>
       <div ref={stage} className="relative h-[100svh] w-full overflow-hidden motion-reduce:h-auto">
         {/* Film */}
         <canvas ref={canvas} className="absolute inset-0 h-full w-full motion-reduce:hidden" aria-hidden />
         <div className="absolute inset-0 hidden motion-reduce:block">
-          <Image src="/frames/poster.webp" alt="Salar de Uyuni at sunrise" fill sizes="100vw" className="object-cover" />
+          <Image src="/frames/poster.webp" alt={t.film.posterAlt} fill sizes="100vw" className="object-cover" />
         </div>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink/70 via-ink/10 to-transparent" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-ink/30" />
@@ -144,7 +146,7 @@ export default function JourneyFilm() {
 
         {/* Chapters */}
         <div className="absolute inset-0 mx-auto flex max-w-[1600px] items-center px-5 md:px-10 motion-reduce:relative motion-reduce:flex-col motion-reduce:gap-16 motion-reduce:py-32">
-          {journeyFilm.chapters.map((c) => (
+          {content.film.chapters.map((c) => (
             <div key={c.title} data-chapter className="absolute inset-x-5 max-w-2xl opacity-0 md:inset-x-10 motion-reduce:relative motion-reduce:opacity-100">
               <p className="eyebrow mb-5 flex items-center gap-3 text-gold">
                 <span className="h-px w-8 bg-gold" />
@@ -158,7 +160,7 @@ export default function JourneyFilm() {
 
         {/* Route map */}
         <div className="absolute bottom-[12vh] right-5 hidden w-[220px] md:right-10 md:block motion-reduce:hidden">
-          <p className="eyebrow mb-3 text-salt/55">The route</p>
+          <p className="eyebrow mb-3 text-salt/55">{t.film.route}</p>
           <svg viewBox="0 0 100 100" className="h-[220px] w-[220px] overflow-visible">
             <path d={d} fill="none" stroke="rgb(243 239 231 / 0.15)" strokeWidth="0.6" strokeDasharray="1.5 1.5" />
             <path data-route d={d} fill="none" stroke="#cfa968" strokeWidth="0.9" strokeLinecap="round" />
@@ -180,8 +182,8 @@ export default function JourneyFilm() {
         </div>
 
         <div className="absolute bottom-[12vh] left-5 md:left-10 motion-reduce:relative motion-reduce:bottom-auto motion-reduce:pb-16">
-          <Link href="/journeys/andean-odyssey" className="link-line eyebrow text-salt/80">
-            View The Andean Odyssey — 14 days
+          <Link href={lp("/journeys/andean-odyssey")} className="link-line eyebrow text-salt/80">
+            {t.film.cta}
           </Link>
         </div>
       </div>

@@ -153,3 +153,13 @@ select.field option { background: var(--color-ink-2); }
 
 /* Floating buttons hide while the full-screen menu is open (set by Nav). */
 html[data-menu="open"] [data-float] { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.3s; }
+
+/* ── Chinese ──────────────────────────────────────────────────────
+   The Latin display faces have no CJK glyphs: fall back to good system
+   CJK fonts, and drop the tight tracking, very tight leading and
+   synthetic italics that suit Latin headlines but break Chinese. */
+:lang(zh) body { font-family: var(--font-inter), "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif; }
+:lang(zh) .font-display { font-family: var(--font-serif), "Songti SC", "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: 0 !important; line-height: 1.18 !important; }
+:lang(zh) .font-impact { font-family: var(--font-anton), "PingFang SC", "Noto Sans SC", "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif; font-weight: 800; letter-spacing: 0.02em; line-height: 1.12 !important; }
+:lang(zh) em, :lang(zh) .italic { font-style: normal; }
+:lang(zh) .eyebrow { letter-spacing: 0.12em; }

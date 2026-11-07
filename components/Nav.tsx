@@ -8,16 +8,19 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { useLenis } from "./SmoothScroll";
 import { openConcierge } from "./concierge-bus";
 import { Wordmark } from "./Preloader";
+import { useI18n } from "./i18n";
+import LocaleSwitcher from "./LocaleSwitcher";
+import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 
-const links = [
-  { href: "/adventures", label: "Adventures", image: "/images/atacama-dune.webp" },
-  { href: "/destinations", label: "Destinations", image: "/images/titicaca-sunset.webp" },
-  { href: "/journeys", label: "Journeys", image: "/images/uyuni-cruiser.webp" },
-  { href: "/payments", label: "Pay by QR", image: "/images/uyuni-sunset.webp" },
-  { href: "/#spin", label: "Spin the Andes", image: "/images/vinicunca-ridge.webp" },
-  { href: "/essentials", label: "Travel Essentials", image: "/images/laguna-colorada.webp" },
-  { href: "/about", label: "Our Story", image: "/images/titicaca-uros.webp" },
-  { href: "/contact", label: "Contact", image: "/images/machu-picchu.webp" },
+const linkDefs: { href: string; key: keyof Dictionary["nav"]; image: string }[] = [
+  { href: "/adventures", key: "adventures", image: "/images/atacama-dune.webp" },
+  { href: "/destinations", key: "destinations", image: "/images/titicaca-sunset.webp" },
+  { href: "/journeys", key: "journeys", image: "/images/uyuni-cruiser.webp" },
+  { href: "/payments", key: "payByQr", image: "/images/uyuni-sunset.webp" },
+  { href: "/#spin", key: "spin", image: "/images/vinicunca-ridge.webp" },
+  { href: "/essentials", key: "essentials", image: "/images/laguna-colorada.webp" },
+  { href: "/about", key: "story", image: "/images/titicaca-uros.webp" },
+  { href: "/contact", key: "contact", image: "/images/machu-picchu.webp" },
 ];
 
 export default function Nav() {
@@ -25,7 +28,9 @@ export default function Nav() {
   const overlay = useRef<HTMLDivElement>(null);
   const tl = useRef<gsap.core.Timeline | null>(null);
   const [open, setOpen] = useState(false);
-  const [preview, setPreview] = useState(links[0].image);
+  const { t, lp } = useI18n();
+  const links = linkDefs.map((l) => ({ ...l, href: lp(l.href), label: t.nav[l.key] as string }));
+  const [preview, setPreview] = useState(linkDefs[0].image);
   const [solid, setSolid] = useState(false);
   const pathname = usePathname();
   const lenis = useLenis();
@@ -84,20 +89,20 @@ export default function Nav() {
       >
         <nav className="mx-auto flex h-20 max-w-[1600px] items-center justify-between px-5 md:px-10">
           <Link
-            href="/"
-            aria-label="Rosario Travels — home"
+            href={lp("/")}
+            aria-label={t.nav.home}
             className={`group flex items-baseline gap-2 transition-opacity duration-500 ${
               // On the home hero the big wordmark is the logo; the nav one appears once you scroll.
-              pathname === "/" && !solid && !open ? "pointer-events-none opacity-0" : "opacity-100"
+              pathname === lp("/") && !solid && !open ? "pointer-events-none opacity-0" : "opacity-100"
             }`}
           >
             <Wordmark className="text-[1.7rem] [text-shadow:0_1px_16px_rgb(10_11_12/0.55)] md:text-[1.9rem]" />
-            <span className="eyebrow hidden text-[0.6rem] text-salt/50 sm:inline">Andes · Since 2009</span>
+            <span className="eyebrow hidden text-[0.6rem] text-salt/50 xl:inline">{t.nav.since}</span>
           </Link>
 
           <div className="hidden items-center gap-9 lg:flex">
             {links.slice(0, 4).map((l) => (
-              <Link key={l.href} href={l.href} className="link-line text-[0.82rem] tracking-wide text-salt/80 transition hover:text-salt">
+              <Link key={l.href} href={l.href} className="link-line whitespace-nowrap text-[0.82rem] tracking-wide text-salt/80 transition hover:text-salt">
                 {l.label}
               </Link>
             ))}
@@ -112,12 +117,15 @@ export default function Nav() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-copper opacity-60 group-hover:bg-ink" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-copper group-hover:bg-ink" />
               </span>
-              Plan with Rosario AI
+              {t.nav.planWithAI}
             </button>
+            <div className="hidden md:block">
+              <LocaleSwitcher />
+            </div>
             <button
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
-              aria-label={open ? "Close menu" : "Open menu"}
+              aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
               className="relative flex h-11 w-11 items-center justify-center rounded-full border border-salt/25 transition hover:border-salt"
             >
               <span className={`absolute h-px w-4 bg-salt transition duration-500 ${open ? "rotate-45" : "-translate-y-[3px]"}`} />
@@ -160,13 +168,16 @@ export default function Nav() {
             ))}
             <div className="absolute inset-0 bg-gradient-to-t from-ink/70 to-transparent" />
             <p className="absolute bottom-8 left-8 right-8 font-display text-3xl italic text-salt/90">
-              “The Andes are not a place you visit. They are a place that visits you.”
+              {t.nav.menuQuote}
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6 text-sm text-salt/60 lg:col-span-2" data-menu-fade>
             <span>La Paz · Cusco · Santiago</span>
             <a href="mailto:journeys@rosario.travel" className="link-line">journeys@rosario.travel</a>
-            <Link href="/admin" className="link-line">Team portal</Link>
+            <div className="w-full md:hidden">
+              <LocaleSwitcher variant="inline" />
+            </div>
+            <Link href="/admin" className="link-line">{t.nav.teamPortal}</Link>
           </div>
         </div>
       </div>

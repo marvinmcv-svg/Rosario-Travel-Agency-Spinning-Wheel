@@ -3,11 +3,15 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useDB } from "@/lib/store";
+import { useI18n } from "./i18n";
 
 /* A quiet toast for the admin-editable announcement. Appears once, after the
    visitor scrolls past the hero; hides itself after 12 s; remembers dismissal. */
 export default function Announcement() {
-  const text = useDB((db) => db.settings.announcement);
+  const raw = useDB((db) => db.settings.announcement);
+  const { t, lang } = useI18n();
+  // The announcement is written by the team in English; show it on English pages only.
+  const text = lang === "en" ? raw : "";
   const [show, setShow] = useState(false);
   useEffect(() => {
     if (!text) return;
@@ -33,7 +37,7 @@ export default function Announcement() {
   if (!show || !text) return null;
   return (
     <div data-float className="fixed bottom-24 left-5 right-5 z-[55] max-w-sm sm:right-auto animate-[toast_0.8s_var(--ease-expo)] rounded-2xl border border-line bg-ink-2/90 p-5 pr-12 text-sm text-salt/85 shadow-2xl backdrop-blur-xl md:bottom-28 md:left-8">
-      <p className="eyebrow mb-2 text-gold">News from the Altiplano</p>
+      <p className="eyebrow mb-2 text-gold">{t.announcement.eyebrow}</p>
       {text}
       <button
         onClick={() => {
@@ -43,7 +47,7 @@ export default function Announcement() {
           } catch {}
         }}
         className="absolute right-3 top-3 rounded-full p-1.5 text-salt/50 hover:bg-salt/10 hover:text-salt"
-        aria-label="Dismiss"
+        aria-label={t.announcement.dismiss}
       >
         <X className="h-4 w-4" />
       </button>

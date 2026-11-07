@@ -16,12 +16,15 @@ A premium travel-agency website for **Rosario Travel**: private journeys to the 
 | **Rosario AI** | Concierge chat on every page. Streams answers from Claude when `ANTHROPIC_API_KEY` is set, otherwise uses a built-in offline concierge. Hands off to a human designer (creates an inquiry). |
 | **Team portal** (`/admin`) | Passcode-gated: overview KPIs + revenue chart, bookings (search/filter/drawer/status/CSV), inquiries inbox, journey pricing & visibility, wheel prizes & odds & leads, AI conversation log, audience export, settings. |
 
-| **Flyover entrance** | An airliner crosses a dusk sky over the Andes, drawing a contrail; "Rosario Travels" is unveiled in its wake. While the site loads (real percentage), the contrail drifts away; then the sky lifts and the wordmark swooshes down into its permanent place in the hero. Skippable; reduced-motion safe. Code: `components/Preloader.tsx` (the shared `Wordmark` lives there too). |
+| **Flyover entrance** | Plays once per browser session and never holds a visitor more than ~7 s (the film keeps loading in the background). An airliner crosses a dusk sky over the Andes, drawing a contrail; "Rosario Travels" is unveiled in its wake. While the site loads (real percentage), the contrail drifts away; then the sky lifts and the wordmark swooshes down into its permanent place in the hero. Skippable; reduced-motion safe. Code: `components/Preloader.tsx` (the shared `Wordmark` lives there too). |
 | **Adrenaline tunnel** | Pinned CSS-3D fly-through on the home page: scroll pushes the camera along Z past the adventure panels, the pointer steers it. |
 | **Adventures** (`/adventures`) | Death Road, Huayna Potosí, Uyuni night convoy, sandboarding and more: 3D tilt cards, pulse meter and a "Book on WhatsApp" link on each. Data in `lib/adventures.ts`. |
 | **WhatsApp planner** | Four-step "build your message" CTA with a live phone preview; sends to **+591 77165787** (`lib/contact.ts`). Also a floating WhatsApp button on every page and on booking confirmations. |
 | **Travel essentials** (`/essentials`) | Altitude, seasons, visas, health, packing, money and booking, as expandable Q&As with FAQ structured data. Content lives in `lib/essentials.ts` and also feeds Rosario AI, so the chat and the page always agree. |
 | **Booking conditions & privacy** (`/terms`, `/privacy`) | Deposit (30%), balance (60 days), cancellation table, changes, adventure activities, wheel prizes, data use. Deposit and cancellation figures come from `BOOKING_TERMS` in `lib/essentials.ts`. |
+| **Six languages** | English, Español, Português, Français, Deutsch and 中文. English keeps the plain URLs (`/journeys`); others are prefixed (`/es/journeys`). `proxy.ts` sends first-time visitors to their browser language and remembers a choice made in the language switcher (cookie `NEXT_LOCALE`). Every page has hreflang alternates and the sitemap lists all languages. Rosario AI answers in the visitor's language (offline mode too). |
+| **Currency display** | USD, EUR, GBP, BRL, BOB, CNY, picked in the same switcher (defaults per language). Bookings are always quoted and charged in USD; other currencies show as "≈" using the indicative rates in `lib/i18n/config.ts`. |
+| **Journey finder** (`/#finder`) | Four taps (what calls you, how long, what pace, who's coming) score every journey and reveal the best match with two alternatives and a "tailor it with Rosario AI" hand-off. |
 | **Pay by QR** (`/payments`) | QR Simple Bolivia, Tigo Money, Yape/Plin and Binance Pay. Put your bank-issued QR images in `public/qr/` and set `qrImage` in `lib/payments.ts`; until then each QR opens a WhatsApp payment request. |
 
 ### Why the motion looks the way it does
@@ -74,6 +77,16 @@ Destination photography comes from Wikimedia Commons (CC BY / CC BY-SA / CC0 / p
 All bookings, inquiries, leads, conversations and admin edits flow through one module, **`lib/store.ts`**. It persists to `localStorage` so the whole product works with zero infrastructure (and seeds demo data so the portal is meaningful on first open). For production, re-implement its `read`/`write` (or the `actions`) against Supabase/Postgres/an API — no component changes needed.
 
 Rosario AI uses `claude-opus-5-5` (override with `ROSARIO_MODEL`) at low effort for quick replies, with prompt caching on the catalogue system prompt and server-side refusal fallbacks enabled. Its knowledge comes from `lib/data.ts` via `lib/concierge.ts`.
+
+## Translations
+
+| What | Where |
+|---|---|
+| Interface text (buttons, headings, forms, messages) | `lib/i18n/dictionaries/<lang>.ts`. English (`en.ts`) is the master; TypeScript fails the build if another language is missing a string. |
+| Catalogue (destinations, journeys, adventures, travel essentials, film chapters, testimonials, wheel prizes) | `lib/i18n/content/<lang>.ts`, keyed by slug. Prices, photos and dates stay in `lib/data.ts` and apply to every language. |
+| Legal pages | Published in English as the binding version, with a translated notice on other languages. |
+
+To add a language: add its code to `locales` and `localeMeta` in `lib/i18n/config.ts`, create the two files above, and register them in `lib/i18n/server.ts`. The team portal (`/admin`) stays in English. Translations were written for the prototype: have a native speaker review them before launch, especially the travel-essentials answers.
 
 ## SEO
 `app/sitemap.ts` and `app/robots.ts` generate `/sitemap.xml` and `/robots.txt` (admin and API are disallowed). Set `NEXT_PUBLIC_SITE_URL` to the production domain so absolute URLs are correct. Unknown routes get a branded 404 (`app/not-found.tsx`).

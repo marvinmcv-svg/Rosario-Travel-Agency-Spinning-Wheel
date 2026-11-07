@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { actions, useDB } from "@/lib/store";
-import type { WheelPrize } from "@/lib/data";
+import { defaultWheelPrizes, type WheelPrize } from "@/lib/data";
+import { useI18n } from "../i18n";
 import { FadeUp, SplitReveal } from "../motion";
 
 const SPUN_KEY = "rosario.wheel.spun";
@@ -43,7 +44,15 @@ function Chakana() {
 }
 
 export default function SpinWheel() {
-  const prizes = useDB((db) => db.wheelPrizes);
+  const stored = useDB((db) => db.wheelPrizes);
+  const { t, content } = useI18n();
+  const w = t.wheel;
+  // Prizes the team hasn't edited are shown in the visitor's language.
+  const prizes = stored.map((p) => {
+    const base = defaultWheelPrizes.find((d) => d.id === p.id);
+    const loc = content.prizes[p.id];
+    return base && loc && base.label === p.label && base.detail === p.detail ? { ...p, ...loc } : p;
+  });
   const enabled = useDB((db) => db.settings.wheelEnabled);
   const wheel = useRef<SVGGElement>(null);
   const pointer = useRef<SVGSVGElement>(null);
@@ -105,7 +114,7 @@ export default function SpinWheel() {
   const claim = (e: React.FormEvent) => {
     e.preventDefault();
     if (!result || !email.includes("@")) return;
-    const lead = actions.createLead(email.trim(), result);
+    const lead = actions.createLead(email.trim(), stored.find((p) => p.id === result.id) ?? result);
     setCode(lead.code);
   };
 
@@ -121,12 +130,12 @@ export default function SpinWheel() {
       <div className="pointer-events-none absolute -right-40 top-1/2 h-[700px] w-[700px] -translate-y-1/2 rounded-full bg-copper/10 blur-[140px]" />
       <div className="relative mx-auto grid max-w-[1600px] items-center gap-16 lg:grid-cols-2">
         <div>
-          <p className="eyebrow mb-5 text-copper">Spin the Andes</p>
+          <p className="eyebrow mb-5 text-copper">{w.eyebrow}</p>
           <SplitReveal className="font-display text-[clamp(2.6rem,5.5vw,5.5rem)] leading-[0.95] tracking-[-0.03em]">
-            Let the mountains <em className="text-gold">choose a gift.</em>
+            {w.title} <em className="text-gold">{w.titleEm}</em>
           </SplitReveal>
           <FadeUp className="mt-8 max-w-lg text-lg leading-relaxed text-salt/70">
-            One spin per traveller. Every segment is a real privilege on your next journey — from a night in a salt hotel to first-entry permits at Machu Picchu.
+            {w.text}
           </FadeUp>
 
           <div className="mt-10 min-h-[220px]">
@@ -137,14 +146,14 @@ export default function SpinWheel() {
                   disabled={spinning || alreadySpun}
                   className="rounded-full bg-copper px-9 py-4 text-sm font-medium text-ink transition hover:bg-copper-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {spinning ? "The wheel is turning…" : alreadySpun ? "You've already spun — check your inbox" : "Spin the wheel"}
+                  {spinning ? w.turning : alreadySpun ? w.already : w.spin}
                 </button>
-                <p className="mt-4 text-xs text-salt/40">Codes are valid for 12 months on journeys departing in 2027.</p>
+                <p className="mt-4 text-xs text-salt/40">{w.validity}</p>
               </FadeUp>
             )}
             {result && (
               <div data-prize-card className="max-w-md rounded-2xl border border-line bg-ink p-7">
-                <p className="eyebrow text-gold">You won</p>
+                <p className="eyebrow text-gold">{w.won}</p>
                 <p className="mt-2 font-display text-4xl">{result.label}</p>
                 <p className="mt-2 text-sm text-salt/65">{result.detail}</p>
                 {!code ? (
@@ -154,11 +163,11 @@ export default function SpinWheel() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Your email to claim it"
+                      placeholder={w.claimPlaceholder}
                       className="field flex-1"
-                      aria-label="Email address"
+                      aria-label={t.common.emailAddress}
                     />
-                    <button className="shrink-0 rounded-full bg-salt px-5 text-sm font-medium text-ink transition hover:bg-copper">Claim</button>
+                    <button className="shrink-0 rounded-full bg-salt px-5 text-sm font-medium text-ink transition hover:bg-copper">{w.claim}</button>
                   </form>
                 ) : (
                   <div className="mt-6 flex items-center justify-between rounded-xl border border-gold/40 bg-gold/5 px-5 py-4">
@@ -171,7 +180,7 @@ export default function SpinWheel() {
                       className="flex items-center gap-2 text-xs text-salt/70 hover:text-salt"
                     >
                       {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                      {copied ? "Copied" : "Copy"}
+                      {copied ? t.common.copied : t.common.copy}
                     </button>
                   </div>
                 )}

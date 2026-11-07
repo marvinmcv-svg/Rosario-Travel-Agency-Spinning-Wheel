@@ -6,6 +6,8 @@ import QRCode from "qrcode";
 import { Check, QrCode, ShieldCheck } from "lucide-react";
 import { paymentMethods } from "@/lib/payments";
 import { waLink } from "@/lib/contact";
+import { fmt } from "@/lib/i18n/fmt";
+import { useI18n } from "./i18n";
 import { Tilt3D } from "./adventure-ui";
 
 export default function PaymentMethods({ initialRef = "", initialAmount = "" }: { initialRef?: string; initialAmount?: string }) {
@@ -14,6 +16,9 @@ export default function PaymentMethods({ initialRef = "", initialAmount = "" }: 
   const [ref, setRef] = useState(initialRef);
   const [qr, setQr] = useState("");
   const m = paymentMethods.find((x) => x.id === id)!;
+  const { t } = useI18n();
+  const P = t.payments;
+  const local = (pm: (typeof paymentMethods)[number]) => P.methods[pm.id] ?? { kind: pm.kind, steps: pm.steps };
 
   // Pre-fill from ?ref=&amount= (booking confirmation links here).
   useEffect(() => {
@@ -22,8 +27,9 @@ export default function PaymentMethods({ initialRef = "", initialAmount = "" }: 
     if (q.get("amount")) setAmount(q.get("amount")!);
   }, []);
 
-  const intent = `Hi Rosario! 💳 I'd like to pay${amount ? ` US$${amount}` : ""} with ${m.name}${ref ? ` for booking ${ref}` : ""}.`;
-  const receipt = `Hi Rosario! ✅ I just paid with ${m.name}${amount ? ` (US$${amount})` : ""}${ref ? ` for booking ${ref}` : ""}. Sending the receipt now.`;
+  const forRef = ref ? fmt(P.forBooking, { ref }) : "";
+  const intent = fmt(P.intent, { amount: amount ? ` US$${amount}` : "", method: m.name, ref: forRef });
+  const receipt = fmt(P.receipt, { method: m.name, amount: amount ? ` (US$${amount})` : "", ref: forRef });
 
   useEffect(() => {
     if (m.qrImage) return;
@@ -49,24 +55,24 @@ export default function PaymentMethods({ initialRef = "", initialAmount = "" }: 
                 <span className="font-impact text-2xl uppercase tracking-wide">{p.name}</span>
                 <QrCode className="h-5 w-5 opacity-60" style={{ color: p.accent }} />
               </span>
-              <span className="mt-1 block text-xs text-salt/55">{p.kind}</span>
+              <span className="mt-1 block text-xs text-salt/55">{local(p).kind}</span>
             </button>
           ))}
         </div>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2">
           <label>
-            <span className="eyebrow text-salt/50">Amount (USD)</span>
-            <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.,]/g, ""))} placeholder="e.g. 350" className="field mt-1 text-lg" />
+            <span className="eyebrow text-salt/50">{P.amount}</span>
+            <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.,]/g, ""))} placeholder={P.amountPh} className="field mt-1 text-lg" />
           </label>
           <label>
-            <span className="eyebrow text-salt/50">Booking ref (optional)</span>
+            <span className="eyebrow text-salt/50">{P.ref}</span>
             <input value={ref} onChange={(e) => setRef(e.target.value.toUpperCase())} placeholder="RO-XXXX" className="field mt-1 text-lg" />
           </label>
         </div>
 
         <ol className="mt-10 space-y-4">
-          {m.steps.map((s, i) => (
+          {local(m).steps.map((s, i) => (
             <li key={s} className="flex gap-4 text-salt/75">
               <span className="font-impact text-2xl leading-none" style={{ color: m.accent }}>
                 0{i + 1}
@@ -82,10 +88,10 @@ export default function PaymentMethods({ initialRef = "", initialAmount = "" }: 
           rel="noopener noreferrer"
           className="mt-10 inline-flex items-center gap-3 rounded-full bg-[#25d366] px-7 py-4 text-sm font-medium text-[#07280f] transition hover:scale-[1.03]"
         >
-          <Check className="h-4 w-4" /> I paid: send receipt on WhatsApp
+          <Check className="h-4 w-4" /> {P.paid}
         </a>
         <p className="mt-5 flex items-center gap-2 text-xs text-salt/45">
-          <ShieldCheck className="h-4 w-4" /> Your booking is confirmed by a person once the transfer arrives. Never pay a QR you received from an unknown number.
+          <ShieldCheck className="h-4 w-4 shrink-0" /> {P.safety}
         </p>
       </div>
 
@@ -94,7 +100,7 @@ export default function PaymentMethods({ initialRef = "", initialAmount = "" }: 
           <div className="pointer-events-none absolute -inset-20 opacity-40 blur-3xl" style={{ background: `radial-gradient(circle at 30% 20%, ${m.accent}, transparent 55%)` }} />
           <div className="relative flex items-center justify-between">
             <div>
-              <p className="eyebrow text-salt/50">Scan to pay</p>
+              <p className="eyebrow text-salt/50">{P.scan}</p>
               <p className="font-impact mt-1 text-3xl uppercase">{m.name}</p>
             </div>
             <span className="rounded-full border border-salt/20 px-3 py-1 text-xs">{m.currency}</span>
@@ -104,21 +110,21 @@ export default function PaymentMethods({ initialRef = "", initialAmount = "" }: 
               <Image src={m.qrImage} alt={`${m.name} QR code`} fill className="object-contain p-4" />
             ) : qr ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={qr} alt={`QR code: pay with ${m.name} via WhatsApp`} className="h-full w-full" />
+              <img src={qr} alt={fmt(P.qrAlt, { method: m.name })} className="h-full w-full" />
             ) : null}
             <span className="pointer-events-none absolute inset-x-0 top-0 h-1/3 animate-[scan_2.6s_ease-in-out_infinite] bg-gradient-to-b from-transparent to-[rgba(37,211,102,0.35)]" />
           </div>
           <dl className="relative mt-7 space-y-2 text-sm">
             {m.details.map((d) => (
               <div key={d.label} className="flex justify-between gap-4 border-b border-line pb-2">
-                <dt className="text-salt/50">{d.label}</dt>
-                <dd className="text-right">{d.value}</dd>
+                <dt className="text-salt/50">{P.detailLabels[d.label] ?? d.label}</dt>
+                <dd className="text-right">{P.detailValues[d.value] ?? d.value}</dd>
               </div>
             ))}
           </dl>
           {!m.qrImage && (
             <p className="relative mt-5 text-[0.7rem] leading-relaxed text-salt/40">
-              Scanning opens WhatsApp with this payment request; our team replies with the official {m.name} QR for your exact amount.
+              {fmt(P.qrNote, { method: m.name })}
             </p>
           )}
         </div>

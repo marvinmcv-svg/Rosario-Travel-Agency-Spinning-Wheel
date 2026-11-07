@@ -5,12 +5,16 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { destinations, placesLabel } from "@/lib/data";
+import { useI18n } from "../i18n";
+import { countWord, fmt } from "@/lib/i18n/fmt";
 import { SplitReveal } from "../motion";
 
 /* Vertical scroll becomes a journey sideways across the continent.
    Photos counter-drift inside their frames, so the cards feel like windows. */
 export default function DestinationsRail() {
+  const { t, lp, num, content } = useI18n();
+  const destinations = content.destinations;
+  const placesLabel = fmt(t.common.places, { n: countWord(t.numberWords, destinations.length) });
   const section = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
 
@@ -57,13 +61,13 @@ export default function DestinationsRail() {
     <section ref={section} className="relative overflow-hidden bg-salt py-24 text-ink md:flex md:h-[100svh] md:flex-col md:justify-center md:py-0">
       <div className="mx-auto mb-12 flex w-full max-w-[1600px] items-end justify-between gap-6 px-5 md:px-10">
         <div>
-          <p className="eyebrow mb-5 text-copper">{placesLabel} that change you</p>
+          <p className="eyebrow mb-5 text-copper">{fmt(t.rail.eyebrow, { places: placesLabel })}</p>
           <SplitReveal className="font-display text-[clamp(2.6rem,6vw,6rem)] leading-[0.95] tracking-[-0.03em]">
-            South America, <em className="text-lake">end to end.</em>
+            {t.rail.title} <em className="text-lake">{t.rail.titleEm}</em>
           </SplitReveal>
         </div>
-        <Link href="/destinations" className="link-line hidden shrink-0 text-sm md:block">
-          All destinations
+        <Link href={lp("/destinations")} className="link-line hidden shrink-0 text-sm md:block">
+          {t.rail.all}
         </Link>
       </div>
 
@@ -71,7 +75,7 @@ export default function DestinationsRail() {
         {destinations.map((d, i) => (
           <Link
             key={d.slug}
-            href={`/destinations/${d.slug}`}
+            href={lp(`/destinations/${d.slug}`)}
             className="group relative block w-[78vw] shrink-0 sm:w-[46vw] md:w-[30vw] lg:w-[24vw]"
           >
             <div className="relative aspect-[3/4] overflow-hidden rounded-[22px] bg-salt-2">
@@ -80,7 +84,7 @@ export default function DestinationsRail() {
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
               <span className="absolute left-5 top-5 rounded-full bg-salt/90 px-3 py-1 text-[0.68rem] font-medium tracking-wide text-ink">
-                {d.altitude.toLocaleString("en-US")} m
+                {num(d.altitude)} m
               </span>
               <span className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-salt text-ink opacity-0 transition duration-500 group-hover:opacity-100">
                 <ArrowUpRight className="h-4 w-4" />

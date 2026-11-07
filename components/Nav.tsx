@@ -32,7 +32,8 @@ export default function Nav() {
   const links = linkDefs.map((l) => ({ ...l, href: lp(l.href), label: t.nav[l.key] as string }));
   const [preview, setPreview] = useState(linkDefs[0].image);
   const [solid, setSolid] = useState(false);
-  const pathname = usePathname();
+  // English pages are served from an internal /en route (proxy.ts rewrite), so strip it before comparing.
+  const pathname = usePathname().replace(/^\/en(?=\/|$)/, "") || "/";
   const lenis = useLenis();
 
   // Hide on scroll down, reveal on scroll up — the photography gets the screen.

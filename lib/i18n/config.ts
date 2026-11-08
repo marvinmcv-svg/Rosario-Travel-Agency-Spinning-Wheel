@@ -61,7 +61,12 @@ export function negotiate(header: string | null): Locale {
   return defaultLocale;
 }
 
-export const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+/** Absolute site address for canonical links, sitemap and share previews.
+    NEXT_PUBLIC_SITE_URL wins (set it once you have a real domain); on Vercel the
+    production address is provided automatically. */
+export const siteUrl = () =>
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
 
 /** hreflang alternates for a path, for page metadata. */
 export function alternatesFor(lang: Locale, path: string) {

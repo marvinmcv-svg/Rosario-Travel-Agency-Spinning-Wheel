@@ -100,7 +100,7 @@ export default async function DestinationPage({ params }: PageProps<"/[lang]/des
               alt={fmt(D.view, { name: d.name, n: i + 1 })}
               from={i % 2 ? "right" : "left"}
               sizes="(min-width:768px) 60vw, 100vw"
-              className={`rounded-[22px] ${i === 0 ? "aspect-[16/10] md:col-span-8" : i === 1 ? "aspect-[4/5] md:col-span-4 md:mt-32" : "aspect-[21/9] md:col-span-10 md:col-start-2"}`}
+              className={`rounded-[22px] ${d.gallery.length === 1 ? "aspect-[16/10] md:col-span-12 md:aspect-[21/9]" : i === 0 ? "aspect-[16/10] md:col-span-8" : i === 1 ? "aspect-[4/5] md:col-span-4 md:mt-32" : "aspect-[21/9] md:col-span-10 md:col-start-2"}`}
             />
           ))}
         </section>

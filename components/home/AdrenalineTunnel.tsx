@@ -97,89 +97,93 @@ export default function AdrenalineTunnel() {
     );
 
   return (
-    <section ref={root} id="adrenaline" className="relative h-[100svh] overflow-hidden bg-ink">
-      {/* atmosphere */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(196,112,63,0.22),transparent_60%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-40 [background:repeating-conic-gradient(from_0deg_at_50%_50%,transparent_0deg,transparent_5deg,rgba(243,239,231,0.05)_5.4deg,transparent_6deg)]" />
+    // GSAP pinning wraps the section in a pin-spacer; this React-owned wrapper keeps
+    // React's DOM removal working when you navigate away (otherwise: removeChild crash).
+    <div>
+      <section ref={root} id="adrenaline" className="relative h-[100svh] overflow-hidden bg-ink">
+        {/* atmosphere */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(196,112,63,0.22),transparent_60%)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-40 [background:repeating-conic-gradient(from_0deg_at_50%_50%,transparent_0deg,transparent_5deg,rgba(243,239,231,0.05)_5.4deg,transparent_6deg)]" />
 
-      {/* 3D stage */}
-      <div className="absolute inset-0 [perspective:900px] [perspective-origin:50%_50%]">
-        <div ref={cam} className="absolute inset-0 [transform-style:preserve-3d]">
-          <div ref={world} className="absolute inset-0 [transform-style:preserve-3d] will-change-transform">
-            <p
-              className="font-impact text-outline absolute left-1/2 top-1/2 whitespace-nowrap text-[22vw] uppercase leading-none"
-              style={{ transform: `translate(-50%,-50%) translateZ(${-GAP * (adventures.length + 2)}px) scale(4)` }}
-              aria-hidden
-            >
-              {t.tunnel.feel}
-            </p>
-            {adventures.map((a, i) => {
-              const side = i % 2 === 0 ? -1 : 1;
-              return (
-                <article
-                  key={a.slug}
-                  data-panel
-                  className="absolute left-1/2 top-1/2 w-[min(78vw,520px)]"
-                  style={{
-                    transform: `translate(-50%,-50%) translate3d(${side * 28}vw, ${(i % 3) * 6 - 6}vh, ${-(i + 1) * GAP}px) rotateY(${side * -14}deg)`,
-                    opacity: i < 2 ? 1 : 0,
-                  }}
-                >
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] border border-salt/15 shadow-[0_60px_120px_-30px_rgba(0,0,0,0.9)]">
-                    <Image src={a.image} alt={a.name} fill sizes="520px" className="object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-7">
-                      <p className="eyebrow text-salt/70">{a.place}</p>
-                      <p className="font-impact mt-3 text-[clamp(3rem,7vw,5.5rem)] leading-[0.85] text-salt">{a.stat}</p>
-                      <p className="text-sm text-salt/70">{a.statLabel}</p>
-                      <div className="mt-5 flex items-end justify-between gap-4">
-                        <h3 className="font-display text-3xl leading-none">{a.name}</h3>
-                        <PulseMeter value={a.pulse} />
+        {/* 3D stage */}
+        <div className="absolute inset-0 [perspective:900px] [perspective-origin:50%_50%]">
+          <div ref={cam} className="absolute inset-0 [transform-style:preserve-3d]">
+            <div ref={world} className="absolute inset-0 [transform-style:preserve-3d] will-change-transform">
+              <p
+                className="font-impact text-outline absolute left-1/2 top-1/2 whitespace-nowrap text-[22vw] uppercase leading-none"
+                style={{ transform: `translate(-50%,-50%) translateZ(${-GAP * (adventures.length + 2)}px) scale(4)` }}
+                aria-hidden
+              >
+                {t.tunnel.feel}
+              </p>
+              {adventures.map((a, i) => {
+                const side = i % 2 === 0 ? -1 : 1;
+                return (
+                  <article
+                    key={a.slug}
+                    data-panel
+                    className="absolute left-1/2 top-1/2 w-[min(78vw,520px)]"
+                    style={{
+                      transform: `translate(-50%,-50%) translate3d(${side * 28}vw, ${(i % 3) * 6 - 6}vh, ${-(i + 1) * GAP}px) rotateY(${side * -14}deg)`,
+                      opacity: i < 2 ? 1 : 0,
+                    }}
+                  >
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] border border-salt/15 shadow-[0_60px_120px_-30px_rgba(0,0,0,0.9)]">
+                      <Image src={a.image} alt={a.name} fill sizes="520px" className="object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 p-7">
+                        <p className="eyebrow text-salt/70">{a.place}</p>
+                        <p className="font-impact mt-3 text-[clamp(3rem,7vw,5.5rem)] leading-[0.85] text-salt">{a.stat}</p>
+                        <p className="text-sm text-salt/70">{a.statLabel}</p>
+                        <div className="mt-5 flex items-end justify-between gap-4">
+                          <h3 className="font-display text-3xl leading-none">{a.name}</h3>
+                          <PulseMeter value={a.pulse} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </article>
-              );
-            })}
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* HUD */}
-      <div className="pointer-events-none absolute inset-0 flex flex-col justify-between px-5 py-24 md:px-10">
-        <div className="mx-auto flex w-full max-w-[1600px] items-start justify-between">
-          <div>
-            <p className="eyebrow text-copper">{t.tunnel.eyebrow}</p>
-            <h2 className="font-impact mt-3 text-[clamp(2.6rem,7vw,7rem)] uppercase leading-[0.85]">
-              {t.tunnel.title}<br />
-              <span className="text-outline">{t.tunnel.titleOutline}</span>
-            </h2>
+        {/* HUD */}
+        <div className="pointer-events-none absolute inset-0 flex flex-col justify-between px-5 py-24 md:px-10">
+          <div className="mx-auto flex w-full max-w-[1600px] items-start justify-between">
+            <div>
+              <p className="eyebrow text-copper">{t.tunnel.eyebrow}</p>
+              <h2 className="font-impact mt-3 text-[clamp(2.6rem,7vw,7rem)] uppercase leading-[0.85]">
+                {t.tunnel.title}<br />
+                <span className="text-outline">{t.tunnel.titleOutline}</span>
+              </h2>
+            </div>
+            <div className="hidden text-right md:block">
+              <p className="eyebrow text-salt/50">{t.tunnel.altitude}</p>
+              <p className="font-impact text-5xl tabular-nums">
+                <span ref={hud}>6088</span>
+                <span className="text-copper"> m</span>
+              </p>
+            </div>
           </div>
-          <div className="hidden text-right md:block">
-            <p className="eyebrow text-salt/50">{t.tunnel.altitude}</p>
-            <p className="font-impact text-5xl tabular-nums">
-              <span ref={hud}>6088</span>
-              <span className="text-copper"> m</span>
-            </p>
+          <div className="pointer-events-auto mx-auto flex w-full max-w-[1600px] flex-wrap items-center justify-between gap-4">
+            <p className="eyebrow text-salt/50">{t.tunnel.scroll}</p>
+            <div className="flex flex-wrap gap-3">
+              <Link href={lp("/adventures")} className="rounded-full border border-salt/30 bg-ink/60 px-6 py-3 text-sm backdrop-blur transition hover:border-copper hover:text-copper-2">
+                {t.tunnel.all}
+              </Link>
+              <a
+                href={waLink(t.tunnel.wa)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full bg-copper px-6 py-3 text-sm font-medium text-ink transition hover:bg-copper-2"
+              >
+                {t.common.bookOnWhatsApp}
+              </a>
+            </div>
           </div>
         </div>
-        <div className="pointer-events-auto mx-auto flex w-full max-w-[1600px] flex-wrap items-center justify-between gap-4">
-          <p className="eyebrow text-salt/50">{t.tunnel.scroll}</p>
-          <div className="flex flex-wrap gap-3">
-            <Link href={lp("/adventures")} className="rounded-full border border-salt/30 bg-ink/60 px-6 py-3 text-sm backdrop-blur transition hover:border-copper hover:text-copper-2">
-              {t.tunnel.all}
-            </Link>
-            <a
-              href={waLink(t.tunnel.wa)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full bg-copper px-6 py-3 text-sm font-medium text-ink transition hover:bg-copper-2"
-            >
-              {t.common.bookOnWhatsApp}
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

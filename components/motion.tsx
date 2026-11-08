@@ -122,9 +122,9 @@ export function ImageReveal({
       gsap.fromTo(
         w,
         { clipPath: start },
-        { clipPath: "inset(0% 0 0 0)", duration: 1.6, ease: "silk", scrollTrigger: { trigger: w, start: "top 85%", once: true } },
+        { clipPath: "inset(0% 0 0 0)", duration: 1.1, ease: "silk", scrollTrigger: { trigger: w, start: "top 95%", once: true } },
       );
-      gsap.fromTo(i, { scale: 1.25 }, { scale: 1, duration: 2, scrollTrigger: { trigger: w, start: "top 85%", once: true } });
+      gsap.fromTo(i, { scale: 1.25 }, { scale: 1, duration: 1.6, scrollTrigger: { trigger: w, start: "top 95%", once: true } });
       if (parallax) {
         gsap.fromTo(
           i,

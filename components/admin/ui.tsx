@@ -40,9 +40,10 @@ export const btn = "rounded-full border border-salt/20 px-4 py-2 text-sm transit
 export const btnSolid = "rounded-full bg-copper px-4 py-2 text-sm font-medium text-ink transition hover:bg-copper-2";
 
 export const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+/** "2027-02" → "Feb 27"; a full departure date "2027-02-06" → "Feb 6, 27". */
 export const fmtMonth = (ym: string) => {
-  const [y, m] = ym.split("-").map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+  const [y, m, d] = ym.split("-").map(Number);
+  return new Date(y, m - 1, d || 1).toLocaleDateString("en-US", d ? { month: "short", day: "numeric", year: "2-digit" } : { month: "short", year: "2-digit" });
 };
 
 export function downloadCSV(name: string, rows: Record<string, unknown>[]) {

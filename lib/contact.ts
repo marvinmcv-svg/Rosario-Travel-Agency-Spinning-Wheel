@@ -5,3 +5,6 @@ export const WHATSAPP_DISPLAY = "+591 771 65787";
 
 export const waLink = (text?: string) =>
   `https://wa.me/${WHATSAPP_NUMBER}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
+
+/** Studio inbox used by every "send by email" fallback. */
+export const EMAIL = "journeys@rosario.travel";

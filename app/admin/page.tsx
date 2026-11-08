@@ -23,8 +23,9 @@ export default function Overview() {
     const recent = bookings.filter((b) => new Date(b.createdAt).getTime() > weekAgo).length;
     const byMonth = new Map<string, { value: number; count: number }>();
     live.forEach((b) => {
-      const m = byMonth.get(b.date) ?? { value: 0, count: 0 };
-      byMonth.set(b.date, { value: m.value + b.total, count: m.count + 1 });
+      const key = b.date.slice(0, 7); // departures are full dates; chart by month
+      const m = byMonth.get(key) ?? { value: 0, count: 0 };
+      byMonth.set(key, { value: m.value + b.total, count: m.count + 1 });
     });
     const months = [...byMonth.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([month, v]) => ({ month, ...v }));
     const sources = (Object.keys(sourceLabel) as (keyof typeof sourceLabel)[]).map((k) => ({ k, n: bookings.filter((b) => b.source === k).length }));

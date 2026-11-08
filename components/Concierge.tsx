@@ -1,5 +1,7 @@
 "use client";
 
+import { waLink } from "@/lib/contact";
+import { fmt } from "@/lib/i18n/fmt";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowUp, Sparkles, X } from "lucide-react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
@@ -41,8 +43,6 @@ export default function Concierge() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [conv, setConv] = useState<Conversation | null>(null);
-  const [handoff, setHandoff] = useState<"idle" | "form" | "sent">("idle");
-  const [email, setEmail] = useState("");
   const [revealed, setRevealed] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
@@ -219,31 +219,23 @@ export default function Concierge() {
 
           {messages.length >= 2 && !busy && (
             <div className="rounded-2xl border border-gold/25 bg-gold/[0.04] p-4 text-xs">
-              {handoff === "idle" && (
-                <button onClick={() => setHandoff("form")} className="w-full text-left text-gold">
-                  {C.handoff}
-                </button>
-              )}
-              {handoff === "form" && (
-                <form
-                  className="flex gap-2"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!email.includes("@")) return;
-                    actions.createInquiry({
-                      name: "Rosario AI visitor",
-                      email: email.trim(),
-                      interest: "Rosario AI hand-off",
-                      message: messages.filter((m) => m.role === "user").map((m) => m.content).join(" · "),
-                    });
-                    setHandoff("sent");
-                  }}
-                >
-                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={C.yourEmail} className="field flex-1 py-2 text-sm" />
-                  <button className="rounded-full bg-gold px-4 text-xs font-medium text-ink">{t.common.send}</button>
-                </form>
-              )}
-              {handoff === "sent" && <p className="text-gold">{C.handoffSent}</p>}
+              {/* Hand-off to a person: WhatsApp with the visitor's questions, logged for the portal too. */}
+              <a
+                href={waLink(fmt(C.handoffWa, { q: messages.filter((m) => m.role === "user").map((m) => `• ${m.content}`).join("\n") }))}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() =>
+                  actions.createInquiry({
+                    name: "Rosario AI visitor",
+                    email: "via WhatsApp",
+                    interest: "Rosario AI hand-off",
+                    message: messages.filter((m) => m.role === "user").map((m) => m.content).join(" · "),
+                  })
+                }
+                className="block w-full text-left text-gold"
+              >
+                {C.handoff}
+              </a>
             </div>
           )}
         </div>

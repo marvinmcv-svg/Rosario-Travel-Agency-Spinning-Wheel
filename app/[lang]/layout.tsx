@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import "../globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { fontVars } from "@/lib/fonts";
 import { alternatesFor, hasLocale, localeMeta, locales, siteUrl } from "@/lib/i18n/config";
 import { getI18n } from "@/lib/i18n/server";
@@ -56,6 +57,8 @@ export default async function LangLayout({ children, params }: LayoutProps<"/[la
             <WhatsAppFloat />
           </SmoothScroll>
         </I18nProvider>
+        {/* Vercel Web Analytics: cookieless page views by country, page and referrer. */}
+        <Analytics />
       </body>
     </html>
   );

@@ -30,7 +30,7 @@ export type Booking = {
   email: string;
   phone?: string;
   travellers: number;
-  date: string; // preferred departure month (YYYY-MM)
+  date: string; // departure start date (YYYY-MM-DD); older demo bookings hold a month (YYYY-MM)
   notes?: string;
   total: number;
   status: BookingStatus;

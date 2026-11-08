@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CalendarCheck, Disc3, Inbox, LayoutDashboard, LogOut, Map, Menu, MessagesSquare, Settings, Users, X } from "lucide-react";
 import { gsap } from "@/lib/gsap";
-import { connectAdmin, SHARED, useDB } from "@/lib/store";
+import { connectAdmin, useDB } from "@/lib/store";
 
 const nav = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
@@ -48,7 +48,6 @@ function Login({ onDone }: { onDone: () => void }) {
         <button disabled={busy || !code} className="mt-8 w-full rounded-full bg-copper py-3.5 text-sm font-medium text-ink transition hover:bg-copper-2 disabled:opacity-50">
           {busy ? "Checking…" : "Enter"}
         </button>
-        {!SHARED && <p className="mt-5 text-center text-xs text-salt/40">Demo passcode: <span className="font-mono text-salt/60">rosario</span></p>}
       </form>
     </div>
   );

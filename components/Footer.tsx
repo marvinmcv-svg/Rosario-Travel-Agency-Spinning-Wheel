@@ -55,6 +55,7 @@ export default function Footer() {
             <Link href={lp("/journeys")} className="link-line w-fit text-salt/75 hover:text-salt">{t.nav.journeys}</Link>
             <Link href={lp("/#spin")} className="link-line w-fit text-salt/75 hover:text-salt">{t.nav.spin}</Link>
             <Link href={lp("/essentials")} className="link-line w-fit text-salt/75 hover:text-salt">{f.essentials}</Link>
+            <Link href={lp("/stories")} className="link-line w-fit text-salt/75 hover:text-salt">{t.nav.stories}</Link>
             <Link href={lp("/#finder")} className="link-line w-fit text-salt/75 hover:text-salt">{f.findJourney}</Link>
           </div>
           <div className="flex flex-col gap-3">

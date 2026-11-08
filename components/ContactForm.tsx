@@ -4,6 +4,7 @@ import { useState } from "react";
 import { fmt } from "@/lib/i18n/fmt";
 import { useI18n } from "./i18n";
 import { actions } from "@/lib/store";
+import { EMAIL, waLink } from "@/lib/contact";
 
 export default function ContactForm() {
   const { t, content } = useI18n();
@@ -11,13 +12,28 @@ export default function ContactForm() {
   const destinations = content.destinations;
   const [f, setF] = useState({ name: "", email: "", interest: destinations[0].name, message: "" });
   const [sent, setSent] = useState(false);
-  if (sent)
+  if (sent) {
+    // Hand the message to the team directly: WhatsApp first, email as the fallback.
+    const body = fmt(C.waText, { name: f.name.trim(), email: f.email.trim(), interest: f.interest, message: f.message.trim() });
     return (
       <div className="mt-12 rounded-[24px] border border-gold/30 p-8">
         <p className="eyebrow text-gold">{C.received}</p>
         <p className="mt-3 font-display text-3xl">{fmt(C.thanks, { name: f.name.split(" ")[0] })}</p>
+        <p className="mt-6 text-sm text-salt/65">{C.hint}</p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <a href={waLink(body)} target="_blank" rel="noopener noreferrer" className="rounded-full bg-[#25d366] px-5 py-3 text-sm font-medium text-[#07280f]">
+            {C.wa}
+          </a>
+          <a
+            href={`mailto:${EMAIL}?subject=${encodeURIComponent(fmt(C.emailSubject, { interest: f.interest }))}&body=${encodeURIComponent(body)}`}
+            className="rounded-full border border-salt/25 px-5 py-3 text-sm transition hover:border-copper"
+          >
+            {C.email}
+          </a>
+        </div>
       </div>
     );
+  }
   return (
     <form
       className="mt-12 grid gap-6 sm:grid-cols-2"

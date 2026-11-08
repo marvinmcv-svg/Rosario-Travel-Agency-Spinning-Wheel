@@ -110,8 +110,8 @@ export async function createBooking(input: Partial<Booking>) {
   if (!journey) throw new StoreError("unknown journey", 400);
   const travellers = Math.round(Number(input.travellers));
   if (!(travellers >= 1 && travellers <= 30)) throw new StoreError("invalid travellers", 400);
-  const date = str(input.date, 7)!;
-  if (!/^\d{4}-\d{2}$/.test(date)) throw new StoreError("invalid month", 400);
+  const date = str(input.date, 10)!;
+  if (!/^\d{4}-\d{2}(-\d{2})?$/.test(date)) throw new StoreError("invalid date", 400);
 
   const { journeyOverrides } = await getConfig();
   const subtotal = (journeyOverrides[journey.slug]?.priceFrom ?? journey.priceFrom) * travellers;

@@ -14,7 +14,7 @@ create table public.bookings (
   email            text not null check (char_length(email) <= 320),
   phone            text check (char_length(phone) <= 60),
   travellers       int  not null check (travellers between 1 and 30),
-  departure_month  text not null check (departure_month ~ '^\d{4}-\d{2}$'),
+  departure_month  text not null check (departure_month ~ '^\d{4}-\d{2}(-\d{2})?$'),
   notes            text check (char_length(notes) <= 4000),
   total            numeric(12,2) not null check (total >= 0),
   status           text not null default 'new' check (status in ('new','confirmed','deposit','cancelled')),

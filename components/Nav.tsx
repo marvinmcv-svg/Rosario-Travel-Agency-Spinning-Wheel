@@ -19,6 +19,7 @@ const linkDefs: { href: string; key: keyof Dictionary["nav"]; image: string }[] 
   { href: "/payments", key: "payByQr", image: "/images/uyuni-sunset.webp" },
   { href: "/#spin", key: "spin", image: "/images/vinicunca-ridge.webp" },
   { href: "/essentials", key: "essentials", image: "/images/laguna-colorada.webp" },
+  { href: "/stories", key: "stories", image: "/images/titicaca-dawn.webp" },
   { href: "/about", key: "story", image: "/images/titicaca-uros.webp" },
   { href: "/contact", key: "contact", image: "/images/machu-picchu.webp" },
 ];

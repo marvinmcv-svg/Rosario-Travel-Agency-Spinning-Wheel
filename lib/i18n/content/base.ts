@@ -3,6 +3,7 @@
 import { adventures } from "@/lib/adventures";
 import { defaultWheelPrizes, destinations, journeyFilm, journeys, testimonials } from "@/lib/data";
 import { essentials } from "@/lib/essentials";
+import { experiences } from "@/lib/experiences";
 import type { Content, ContentOverlay } from "./types";
 
 export const baseContent: Content = {
@@ -18,6 +19,7 @@ export const baseContent: Content = {
   },
   testimonials,
   prizes: Object.fromEntries(defaultWheelPrizes.map((p) => [p.id, { label: p.label, detail: p.detail }])),
+  experiences: Object.fromEntries(experiences.map((e) => [e.slug, e])),
 };
 
 /** Apply one language's overlay. Missing entries fall back to English. */
@@ -32,5 +34,11 @@ export function applyOverlay(o: ContentOverlay | null): Content {
     film: { ...b.film, chapters: o.film.chapters, route: o.film.route },
     testimonials: b.testimonials.map((t, i) => ({ ...t, ...o.testimonials[i] })),
     prizes: { ...b.prizes, ...o.prizes },
+    experiences: Object.fromEntries(
+      Object.entries(b.experiences).map(([slug, e]) => [
+        slug,
+        { ...e, activities: e.activities.map((a) => ({ ...a, ...o.experiences?.[slug]?.[a.id] })) },
+      ]),
+    ),
   };
 }

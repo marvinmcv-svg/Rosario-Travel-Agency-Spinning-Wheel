@@ -187,5 +187,75 @@
   "author": "Yifan Wang",
   "license": "CC BY 2.0",
   "source": "https://commons.wikimedia.org/wiki/File:Vinicunca,_Rainbow_Mountain.jpg"
+ },
+ {
+  "name": "uyuni-stars",
+  "title": "Night sky over the Salar de Uyuni",
+  "author": "Karla Robinson",
+  "license": "Unsplash License",
+  "source": "https://unsplash.com/photos/a-man-standing-in-a-field-with-stars-in-the-sky-MsXD0hXcX2s"
+ },
+ {
+  "name": "uyuni-trains",
+  "title": "Train cemetery, Uyuni",
+  "author": "Paulo Kopzinski",
+  "license": "Unsplash License",
+  "source": "https://unsplash.com/photos/5-7lVTYeIzA"
+ },
+ {
+  "name": "lipez-geysers",
+  "title": "Sol de Mañana 2018",
+  "author": "kallerna",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Sol_de_Mañana_2018.jpg"
+ },
+ {
+  "name": "lipez-stone-tree",
+  "title": "Arbol de Piedra, Bolivia (1)",
+  "author": "Pedro Szekely",
+  "license": "CC BY 2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Arbol_de_Piedra,_Bolivia_(1).jpg"
+ },
+ {
+  "name": "atacama-tatio",
+  "title": "Géiseres del Tatio, Atacama, Chile, 2016-02-01, DD 01-02 HDR",
+  "author": "Diego Delso",
+  "license": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Géiseres_del_Tatio,_Atacama,_Chile,_2016-02-01,_DD_01-02_HDR.JPG"
+ },
+ {
+  "name": "atacama-stars",
+  "title": "Time — star trails over the Atacama",
+  "author": "Marek Piwnicki",
+  "license": "Unsplash License",
+  "source": "https://unsplash.com/photos/star-trails-shine-above-mountains-and-the-desert-cOEOiVxB2os"
+ },
+ {
+  "name": "andes-llamas",
+  "title": "Llamas above Cusco",
+  "author": "Andy Salazar",
+  "license": "Unsplash License",
+  "source": "https://unsplash.com/photos/a-couple-of-llamas-standing-on-top-of-a-mountain-tnJg18m9mag"
+ },
+ {
+  "name": "iguazu-panorama",
+  "title": "Foz do Iguaçu panorama",
+  "author": "Rafael Peier",
+  "license": "Unsplash License",
+  "source": "https://unsplash.com/photos/panoramic-view-of-majestic-waterfalls-cascading-through-lush-green-landscape-dAeFYLzNc6Y"
+ },
+ {
+  "name": "iguazu-bridge",
+  "title": "Iguazú Falls catwalks",
+  "author": "Jeffrey Eisen",
+  "license": "Unsplash License",
+  "source": "https://unsplash.com/photos/a-view-of-a-waterfall-with-a-bridge-in-the-foreground-bBCyYxQ7EnE"
+ },
+ {
+  "name": "amazon-boat",
+  "title": "Boat tour on Lago Tarapoto, Amazonas",
+  "author": "Azzedine Rouichi",
+  "license": "Unsplash License",
+  "source": "https://unsplash.com/photos/boating-through-a-lush-green-amazon-river-S24i3OzQMYU"
  }
 ]

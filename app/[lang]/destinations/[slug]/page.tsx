@@ -7,10 +7,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageHero from "@/components/PageHero";
-import { FadeUp, ImageReveal, SplitReveal } from "@/components/motion";
+import { FadeUp, SplitReveal } from "@/components/motion";
 import AskRosario from "@/components/AskRosario";
 import { destinations } from "@/lib/data";
 import { localeMeta, localePath } from "@/lib/i18n/config";
+import { ActivityShowcase, AltitudeGauge, DayArc, PhotoStrip, SeasonStrip } from "@/components/destination/DestinationExperience";
 
 export function generateStaticParams() {
   return destinations.map((d) => ({ slug: d.slug }));
@@ -35,11 +36,23 @@ export default async function DestinationPage({ params }: PageProps<"/[lang]/des
   const related = content.journeys.filter((j) => j.destinations.includes(d.slug));
   const lp = (path: string) => localePath(lang, path);
   const intl = localeMeta[lang].intl;
+  const exp = content.experiences[d.slug];
+  const activities = exp?.activities ?? [];
+  const photos = Array.from(new Set([d.image, ...d.gallery, ...activities.map((a) => a.image)]));
 
   return (
     <>
       <PageHero image={d.image} eyebrow={`${d.country} · ${d.region}`} title={d.name}>
         <p className="max-w-xl font-display text-2xl italic text-salt/85">{d.tagline}</p>
+        <div className="mt-8 flex flex-wrap gap-2 text-xs">
+          <span className="rounded-full border border-salt/25 bg-ink/30 px-4 py-2 backdrop-blur">▲ {d.altitude.toLocaleString(intl)} m</span>
+          <span className="rounded-full border border-salt/25 bg-ink/30 px-4 py-2 backdrop-blur">{d.coords}</span>
+          {activities.length > 0 && (
+            <a href="#things-to-do" className="rounded-full bg-salt px-4 py-2 text-ink transition hover:bg-copper">
+              {fmt(D.experiencesCount, { n: activities.length })} ↓
+            </a>
+          )}
+        </div>
       </PageHero>
 
       {/* Story + facts */}
@@ -74,6 +87,20 @@ export default async function DestinationPage({ params }: PageProps<"/[lang]/des
         </aside>
       </section>
 
+      {/* Things to do: sticky photo stage + scrollytelling list */}
+      {activities.length > 0 && (
+        <div id="things-to-do">
+          <ActivityShowcase name={d.name} activities={activities} />
+          <DayArc name={d.name} activities={activities} />
+        </div>
+      )}
+
+      {/* When to go + how high */}
+      <section className="mx-auto grid max-w-[1600px] gap-16 px-5 py-28 md:px-10 lg:grid-cols-2 lg:gap-24">
+        <SeasonStrip months={exp?.months ?? Array(12).fill(1)} bestTime={d.bestTime} />
+        <AltitudeGauge altitude={d.altitude} name={d.name} others={list.filter((x) => x.slug !== d.slug).map((x) => ({ name: x.name, altitude: x.altitude }))} />
+      </section>
+
       {/* Highlights */}
       <section className="bg-salt px-5 py-28 text-ink md:px-10">
         <div className="mx-auto max-w-[1600px]">
@@ -90,21 +117,8 @@ export default async function DestinationPage({ params }: PageProps<"/[lang]/des
         </div>
       </section>
 
-      {/* Gallery */}
-      {d.gallery.length > 0 && (
-        <section className="mx-auto grid max-w-[1600px] gap-6 px-5 py-28 md:grid-cols-12 md:px-10">
-          {d.gallery.map((g, i) => (
-            <ImageReveal
-              key={g}
-              src={g}
-              alt={fmt(D.view, { name: d.name, n: i + 1 })}
-              from={i % 2 ? "right" : "left"}
-              sizes="(min-width:768px) 60vw, 100vw"
-              className={`rounded-[22px] ${d.gallery.length === 1 ? "aspect-[16/10] md:col-span-12 md:aspect-[21/9]" : i === 0 ? "aspect-[16/10] md:col-span-8" : i === 1 ? "aspect-[4/5] md:col-span-4 md:mt-32" : "aspect-[21/9] md:col-span-10 md:col-start-2"}`}
-            />
-          ))}
-        </section>
-      )}
+      {/* Photographs drifting by */}
+      {photos.length > 2 && <PhotoStrip images={photos} name={d.name} />}
 
       {/* Related journeys */}
       {related.length > 0 && (

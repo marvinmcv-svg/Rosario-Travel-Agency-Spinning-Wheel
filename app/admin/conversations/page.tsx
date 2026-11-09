@@ -19,7 +19,7 @@ export default function ConversationsAdmin() {
             <button key={c.id} onClick={() => setSel(c.id)} className={`block w-full rounded-xl p-4 text-left transition ${cur?.id === c.id ? "bg-salt/[0.07]" : "hover:bg-salt/[0.03]"}`}>
               <div className="flex justify-between text-xs text-salt/45">
                 <span>{fmtDate(c.startedAt)} · {c.messages.length} messages</span>
-                <span className={c.mode === "claude" ? "text-copper-2" : ""}>{c.mode === "claude" ? "Claude" : "Offline"}</span>
+                <span className={c.mode === "claude" ? "text-copper-2" : ""}>{c.mode === "claude" ? "Live AI" : "Offline"}</span>
               </div>
               <p className="mt-1.5 line-clamp-2 text-sm">{c.messages.find((m) => m.role === "user")?.content}</p>
             </button>

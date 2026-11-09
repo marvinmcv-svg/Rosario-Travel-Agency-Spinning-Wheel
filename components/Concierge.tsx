@@ -67,7 +67,8 @@ export default function Concierge() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ lang, messages: history.map(({ role, content }) => ({ role, content })) }),
         });
-        const mode = (res.headers.get("X-Rosario-Mode") as Conversation["mode"]) || "offline";
+        // "claude" is stored for any live model (Claude or NVIDIA); "offline" for the built-in concierge.
+        const mode: Conversation["mode"] = (res.headers.get("X-Rosario-Mode") ?? "offline") === "offline" ? "offline" : "claude";
         if (!res.body) throw new Error("no body");
         const reader = res.body.getReader();
         const dec = new TextDecoder();

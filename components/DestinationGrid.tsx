@@ -6,6 +6,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Flip } from "gsap/Flip";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { useI18n } from "./i18n";
+import { kindIcon } from "./destination/icons";
+import { fmt } from "@/lib/i18n/fmt";
 
 if (typeof window !== "undefined") gsap.registerPlugin(Flip);
 
@@ -93,6 +95,27 @@ export default function DestinationGrid() {
               <span className="eyebrow shrink-0 text-salt/45">{d.country}</span>
             </div>
             <p className="mt-2 text-salt/60">{d.tagline}</p>
+            {(() => {
+              const acts = content.experiences[d.slug]?.activities ?? [];
+              if (!acts.length) return null;
+              const kinds = Array.from(new Set(acts.map((a) => a.kind)));
+              return (
+                <div className="mt-4 flex items-center gap-3 border-t border-line pt-4 text-xs text-salt/55">
+                  <span className="flex -space-x-1.5">
+                    {kinds.map((k) => {
+                      const Icon = kindIcon[k];
+                      return (
+                        <span key={k} title={t.destinations.kinds[k]} className="flex h-7 w-7 items-center justify-center rounded-full border border-line bg-ink-2 text-copper-2 transition duration-500 group-hover:translate-y-[-3px]">
+                          <Icon className="h-3.5 w-3.5" />
+                        </span>
+                      );
+                    })}
+                  </span>
+                  <span>{fmt(t.destinations.experiencesCount, { n: acts.length })}</span>
+                  <span className="ml-auto truncate text-salt/40 transition group-hover:text-salt/70">{acts[0].title}</span>
+                </div>
+              );
+            })()}
           </Link>
         ))}
       </div>

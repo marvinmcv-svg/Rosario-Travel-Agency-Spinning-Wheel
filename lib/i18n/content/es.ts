@@ -1,4 +1,5 @@
 import type { ContentOverlay } from "./types";
+import experiencesEs from "./experiences-es";
 
 const es: ContentOverlay = {
   destinations: {
@@ -354,6 +355,7 @@ const es: ContentOverlay = {
     p7: { label: "10 % menos", detail: "10 % de descuento en cualquier viaje privado" },
     p8: { label: "Regalo Pachamama", detail: "Un textil aymara tejido a mano enviado a tu casa" },
   },
+  experiences: experiencesEs,
 };
 
 export default es;

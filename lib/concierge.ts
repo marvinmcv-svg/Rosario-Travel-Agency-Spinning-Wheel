@@ -2,6 +2,7 @@
    and by the offline concierge when no API key is configured. */
 import { destinations, journeys, formatPrice } from "./data";
 import { essentials, essentialsForPrompt } from "./essentials";
+import { getExperience } from "./experiences";
 import type { Dictionary } from "./i18n/dictionaries/en";
 import type { Content } from "./i18n/content/types";
 
@@ -18,7 +19,7 @@ What you do:
 
 Destinations:
 ${destinations
-  .map((d) => `- ${d.name} (${d.country}, ${d.altitude} m): ${d.summary} Best time: ${d.bestTime}. Culture: ${d.culture} Page: /destinations/${d.slug}`)
+  .map((d) => `- ${d.name} (${d.country}, ${d.altitude} m): ${d.summary} Best time: ${d.bestTime}. Culture: ${d.culture} Things to do: ${(getExperience(d.slug)?.activities ?? []).map((a) => `${a.title} (${a.time}, ~${a.hours} h, ${a.level})`).join("; ")}. Page: /destinations/${d.slug}`)
   .join("\n")}
 
 Journeys (prices are per traveller, from):

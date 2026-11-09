@@ -163,3 +163,6 @@ html[data-menu="open"] [data-float] { opacity: 0 !important; pointer-events: non
 :lang(zh) .font-impact { font-family: var(--font-anton), "PingFang SC", "Noto Sans SC", "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif; font-weight: 800; letter-spacing: 0.02em; line-height: 1.12 !important; }
 :lang(zh) em, :lang(zh) .italic { font-style: normal; }
 :lang(zh) .eyebrow { letter-spacing: 0.12em; }
+
+/* Destination photo strip: each copy slides its own width, so the loop is seamless */
+@keyframes marquee { to { transform: translateX(-100%); } }

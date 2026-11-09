@@ -1,6 +1,7 @@
 import type { Adventure } from "@/lib/adventures";
 import type { Destination, ItineraryDay, Journey } from "@/lib/data";
 import type { EssentialTopic } from "@/lib/essentials";
+import type { ActivityText, Experience } from "@/lib/experiences";
 
 export type DestinationText = Pick<Destination, "name" | "country" | "region" | "tagline" | "summary" | "story" | "bestTime" | "culture" | "highlights">;
 export type JourneyText = { title: string; subtitle: string; summary: string; itinerary: ItineraryDay[]; includes: string[] };
@@ -17,6 +18,8 @@ export type ContentOverlay = {
   film: FilmText;
   testimonials: TestimonialText[];
   prizes: Record<string, { label: string; detail: string }>;
+  /** Destination slug → activity id → title/text. Optional: missing ones stay English. */
+  experiences?: Record<string, Record<string, ActivityText>>;
 };
 
 /** Localised catalogue handed to pages and client components. */
@@ -29,4 +32,6 @@ export type Content = {
   film: FilmText & { at: { at: number; until: number }[]; points: { x: number; y: number }[] };
   testimonials: { quote: string; trip: string; origin: string; name: string }[];
   prizes: Record<string, { label: string; detail: string }>;
+  /** Things to do, keyed by destination slug */
+  experiences: Record<string, Experience>;
 };

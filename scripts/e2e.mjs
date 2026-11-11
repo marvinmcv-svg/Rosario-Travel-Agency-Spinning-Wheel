@@ -75,7 +75,8 @@ function watch(page) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
   page.on("console", (m) => {
-    if (m.type() === "error" && !IGNORE.some((r) => r.test(m.text()))) errors.push(`console: ${m.text()}`);
+    // "Failed to load resource" has no URL in its text; failed requests are reported (with URL) below.
+    if (m.type() === "error" && !/Failed to load resource/.test(m.text()) && !IGNORE.some((r) => r.test(m.text()))) errors.push(`console: ${m.text()}`);
   });
   page.on("response", (r) => {
     if (r.status() >= 400 && r.url().startsWith(BASE) && !IGNORE.some((x) => x.test(r.url()))) errors.push(`${r.status()} ${r.url()}`);
@@ -147,8 +148,8 @@ for (const vp of VIEWPORTS) {
       assert((await page.locator("[data-preloader] [data-mark-q]").count()) === 4, "mark should have 4 quadrants");
       await page.waitForTimeout(2400);
       await page.screenshot({ path: join(OUT, `${vp.name}-intro-weave.png`) });
-      const pct = await page.locator("[data-preloader] span.tabular-nums >> nth=0").textContent().catch(() => null);
-      assert(pct === null || /^\d{2,3}$/.test(pct.trim()), `odd percentage "${pct}"`);
+      const pct = await page.locator("[data-preloader] .tabular-nums span").first().textContent({ timeout: 1000 });
+      assert(/^\d{2,3}$/.test(pct.trim()), `odd percentage "${pct}"`);
     });
     await check("intro shows the ROSARIO TRAVELS lockup", async () => {
       await page.waitForTimeout(1300);

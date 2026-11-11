@@ -5,6 +5,22 @@ import { essentials, essentialsForPrompt } from "./essentials";
 import { getExperience } from "./experiences";
 import type { Dictionary } from "./i18n/dictionaries/en";
 import type { Content } from "./i18n/content/types";
+import type { Locale } from "./i18n/config";
+import { GROUP, hotels, staysText } from "./hotels";
+
+const HOTEL_WORDS = ["hotel", "hotels", "hoteles", "hôtel", "where to stay", "where do we sleep", "where will we sleep", "accommodation", "lodging", "alojamiento", "hospedaje", "dormir", "estadía", "estadia", "hospedagem", "unterkunft", "übernacht", "酒店", "住宿"];
+
+/** "Where can we sleep?" — our sister hotels and the trips that include them. */
+function hotelsReply(lang: Locale, journeyList: { slug: string; title: string; stays?: { hotel: string; nights: number }[] }[]): string {
+  const S = staysText(lang);
+  const list = hotels.map((h) => `${h.name} (${h.town}, ${h.stars}★, ${h.phone})`).join(" · ");
+  const trips = journeyList.filter((j) => j.stays?.length).slice(0, 4).map((j) => `${j.title} (/journeys/${j.slug})`).join(" · ");
+  return `${S.aboutText}
+
+${list}
+
+${S.combosTitle}: ${trips}. /stays · ${GROUP.email}`;
+}
 
 export const SYSTEM_PROMPT = `You are Rosario, the AI travel concierge of Rosario Travels — a premium, privately-guided travel company founded in La Paz, Bolivia, with studios in Cusco and Santiago. You help travellers dream up and plan journeys through the Andes and South America.
 
@@ -30,6 +46,10 @@ ${journeys
 Travel essentials and booking policy (answer from this; full details at /essentials and /terms):
 ${essentialsForPrompt}
 
+Our sister company — Grupo Rosario / Hoteles Rosario (${GROUP.website}, Instagram ${GROUP.instagramHandle}): Rosario Travels and Hoteles Rosario are one Bolivian family. Recommend our own hotels whenever a traveller sleeps in La Paz, Copacabana or Uyuni, and the journeys that already include them. Hotel reservations office: ${GROUP.phone}, ${GROUP.email}. Hotels page: /stays
+${hotels.map((h) => `- ${h.name} (${h.stars}-star ${h.collection}, ${h.town}, ${h.altitude} m): ${staysText("en").hotels[h.slug].summary} Address: ${h.address}. Phone ${h.phone}.`).join("\n")}
+Journeys that include nights at Hotel Rosario: ${journeys.filter((j) => j.stays?.length).map((j) => `${j.title} (${(j.stays ?? []).map((s) => `${s.nights} nights at ${hotels.find((h) => h.slug === s.hotel)?.name}`).join(", ")}) /journeys/${j.slug}`).join("; ")}
+
 Spin the Andes: visitors can spin a prize wheel once on the home page (/#spin) for perks such as journey credits or a salt-hotel night.`;
 
 /* ── Offline concierge ─────────────────────────────────────────────
@@ -43,6 +63,7 @@ export function offlineReply(input: string): string {
     [d.name, d.slug.replace(/-/g, " "), ...d.name.split(" ")].some((n) => n.length > 4 && q.includes(n.toLowerCase())),
   );
 
+  if (has(...HOTEL_WORDS)) return hotelsReply("en", journeys);
   if (has("altitude", "soroche", "asthma", "sick", "oxygen")) {
     return "Altitude is the one thing the Andes ask you to respect. Our journeys always begin with a slow day in La Paz (3,640 m) or Cusco (3,399 m): hydrate, take coca tea, skip alcohol the first nights and walk gently. On high routes like Uyuni, Laguna Colorada and Vinicunca our guides carry oxygen and a pulse oximeter. If you have a heart or lung condition, please check with your doctor first — and tell your journey designer, who can adjust the route to sleep lower.";
   }
@@ -71,7 +92,8 @@ export function offlineReply(input: string): string {
     return "For a honeymoon I'd look at two moods. Sacred Valley, Privately (8 days, from $5,480) is intimate — colonial Cusco, a private sunrise at Machu Picchu and the Rainbow Mountain without crowds. Patagonia Wild (10 days, from $8,920) pairs the Atacama's star-filled nights with the granite towers of Torres del Paine. Tell me your month and I'll suggest which fits best — or leave your email and a designer will shape a private version with you.";
   }
   if (has("price", "cost", "how much", "budget")) {
-    return `Our journeys start from ${formatPrice(Math.min(...journeys.map((j) => j.priceFrom)))} per traveller (Lake of the Sun, 5 days) up to ${formatPrice(
+    const cheapest = [...journeys].sort((a, b) => a.priceFrom - b.priceFrom)[0];
+    return `Our journeys start from ${formatPrice(cheapest.priceFrom)} per traveller (${cheapest.title}, ${cheapest.days} days) up to ${formatPrice(
       Math.max(...journeys.map((j) => j.priceFrom)),
     )} for Patagonia Wild. Prices include private guides, boutique lodging, internal transport and most meals. Tell me your dates, group size and style, and I'll point you to the best fit.`;
   }
@@ -97,8 +119,9 @@ export function offlineReply(input: string): string {
    Same idea as offlineReply, driven by the language's dictionary
    keywords and its translated travel essentials and catalogue. */
 
-export function localizedOfflineReply(input: string, t: Dictionary, content: Content, money: (usd: number) => string): string {
+export function localizedOfflineReply(input: string, t: Dictionary, content: Content, money: (usd: number) => string, lang: Locale = "en"): string {
   const q = input.toLowerCase();
+  if (HOTEL_WORDS.some((w) => q.includes(w))) return hotelsReply(lang, content.journeys);
   const O = t.offline;
   const has = (words: string[]) => words.some((w) => q.includes(w.toLowerCase()));
   const fill = (s: string, v: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (m, k) => (k in v ? String(v[k]) : m));

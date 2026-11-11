@@ -41,6 +41,8 @@ export type Journey = {
   itinerary: ItineraryDay[];
   includes: string[];
   featured?: boolean;
+  /** Nights in our sister hotels (Hoteles Rosario, see lib/hotels.ts) */
+  stays?: { hotel: string; nights: number }[];
 };
 
 const img = (name: string) => `/images/${name}.webp`;
@@ -327,6 +329,7 @@ const allJourneys: Journey[] = [
     ],
     includes: ["Private guides throughout", "All internal flights & trains", "Boutique hotels and a salt hotel", "Most meals", "Entrance permits", "24/7 Rosario concierge"],
     featured: true,
+    stays: [{ hotel: "rosario-la-paz-sur", nights: 2 }, { hotel: "rosario-lago-titicaca", nights: 1 }],
   },
   {
     slug: "mirror-of-the-sky",
@@ -349,6 +352,7 @@ const allJourneys: Journey[] = [
     ],
     includes: ["Restored Land Cruiser & driver-guide", "Salt hotel", "All meals on the flat", "Oxygen & first aid"],
     featured: true,
+    stays: [{ hotel: "rosario-uyuni", nights: 1 }],
   },
   {
     slug: "sacred-valley-private",
@@ -392,6 +396,7 @@ const allJourneys: Journey[] = [
       { day: "Day 5", title: "Departure", text: "Transfer to Juliaca airport." },
     ],
     includes: ["Private boat", "Expert guides", "Eco-lodge & boutique hotels", "Most meals"],
+    stays: [{ hotel: "rosario-la-paz-sur", nights: 2 }],
   },
   {
     slug: "patagonia-wild",
@@ -433,6 +438,91 @@ const allJourneys: Journey[] = [
       { day: "Day 9", title: "Departure", text: "River and flight back to Lima." },
     ],
     includes: ["Lodges & hotels", "Flights", "Naturalist guides", "All meals in the Amazon"],
+  },
+  /* ── Journeys + stays: trips built around our sister hotels ── */
+  {
+    slug: "rosario-altiplano",
+    title: "The Rosario Altiplano",
+    subtitle: "La Paz · Titicaca · Uyuni, at Hotel Rosario",
+    days: 7,
+    priceFrom: 1690,
+    style: "Signature",
+    difficulty: "Moderate",
+    maxGroup: 8,
+    destinations: ["tiwanaku", "lake-titicaca", "salar-de-uyuni"],
+    image: "/images/hotels/uyuni-hotel-dusk.webp",
+    summary:
+      "Bolivia's three great sights with one family looking after you: two nights in each of our own hotels, from the gardens of La Paz to the shore of Titicaca and the edge of the Salar.",
+    itinerary: [
+      { day: "Days 1–2", title: "La Paz", text: "Airport welcome and check-in at Hotel Boutique Rosario La Paz Sur, lower and gentler for your first night. Cable cars over the city, the Witches' Market and a day at Tiwanaku." },
+      { day: "Days 3–4", title: "Copacabana & Isla del Sol", text: "Along the lake to Hotel Rosario Lago Titicaca. Sunset from Cerro Calvario, then a private boat to Isla del Sol and its Inca stairway." },
+      { day: "Day 5", title: "Fly to Uyuni", text: "Back to La Paz and a short flight to Uyuni. Check in at Hotel Rosario Uyuni and dinner at Tambo Colonial." },
+      { day: "Day 6", title: "Salar de Uyuni", text: "Train cemetery, the Colchani salt cooperative, Incahuasi island and sunset on the salt. Stargazing back at the hotel." },
+      { day: "Day 7", title: "Farewell", text: "Breakfast in Uyuni and flight to La Paz for your connection home." },
+    ],
+    includes: ["6 nights at Hoteles Rosario (2 + 2 + 2)", "Daily breakfast", "Private transfers & bilingual guides", "La Paz–Uyuni flights", "Boat to Isla del Sol", "Full day on the Salar in a Land Cruiser", "24/7 Rosario concierge"],
+    featured: true,
+    stays: [{ hotel: "rosario-la-paz-sur", nights: 2 }, { hotel: "rosario-lago-titicaca", nights: 2 }, { hotel: "rosario-uyuni", nights: 2 }],
+  },
+  {
+    slug: "copacabana-escape",
+    title: "Copacabana Lake Escape",
+    subtitle: "3 days · 2 nights at Hotel Rosario Lago Titicaca",
+    days: 3,
+    priceFrom: 390,
+    style: "Cultural",
+    difficulty: "Easy",
+    maxGroup: 8,
+    destinations: ["lake-titicaca"],
+    image: "/images/hotels/titicaca-hotel.webp",
+    summary: "A short escape to the shore of the sacred lake: two nights in a lake-view room at Hotel Rosario, sunset from Cerro Calvario and a day on Isla del Sol.",
+    itinerary: [
+      { day: "Day 1", title: "La Paz → Copacabana", text: "Private transfer across the Altiplano and the Strait of Tiquina. Check in to your lake-view room and climb Cerro Calvario for sunset." },
+      { day: "Day 2", title: "Isla del Sol", text: "Boat to the island of the sun: the Inca stairway, Pilko Kaina temple and lunch above the lake. Evening back at the hotel." },
+      { day: "Day 3", title: "Copacabana → La Paz", text: "Breakfast over the water, the Basilica of Copacabana and the reed-boat builders, then back to La Paz." },
+    ],
+    includes: ["2 nights at Hotel Rosario Lago Titicaca", "Daily breakfast", "Private transfers from La Paz", "Boat to Isla del Sol", "Local guide"],
+    stays: [{ hotel: "rosario-lago-titicaca", nights: 2 }],
+  },
+  {
+    slug: "uyuni-salt-and-stars",
+    title: "Salt & Stars",
+    subtitle: "3 days · 2 nights at Hotel Rosario Uyuni",
+    days: 3,
+    priceFrom: 590,
+    style: "Expedition",
+    difficulty: "Easy",
+    maxGroup: 6,
+    destinations: ["salar-de-uyuni"],
+    image: "/images/hotels/uyuni-hotel.webp",
+    summary: "The Salar without roughing it: a full day on the salt by Land Cruiser, sunset and stars, and two warm nights in our solar-powered eco hotel in Uyuni.",
+    itinerary: [
+      { day: "Day 1", title: "Uyuni", text: "Arrival and check-in at Hotel Rosario Uyuni. The train cemetery at golden hour, dinner at Tambo Colonial." },
+      { day: "Day 2", title: "Salar de Uyuni", text: "Colchani salt cooperative, the Dakar monument, Incahuasi island and its giant cacti, perspective photos, sunset and stargazing on the salt." },
+      { day: "Day 3", title: "Onward", text: "Breakfast at the hotel and transfer to the airport, or continue south to the lagoons of Lípez." },
+    ],
+    includes: ["2 nights at Hotel Rosario Uyuni", "Daily breakfast & one dinner", "Full day on the Salar with driver-guide", "Airport transfers in Uyuni"],
+    stays: [{ hotel: "rosario-uyuni", nights: 2 }],
+  },
+  {
+    slug: "la-paz-heights",
+    title: "La Paz from the Heights",
+    subtitle: "3 days · 2 nights at Hotel Rosario La Paz",
+    days: 3,
+    priceFrom: 340,
+    style: "Cultural",
+    difficulty: "Easy",
+    maxGroup: 8,
+    destinations: ["tiwanaku"],
+    image: "/images/hotels/lapaz-sur-hotel.webp",
+    summary: "The highest seat of government on Earth, seen from its cable cars, its markets and its 1,500-year-old neighbour Tiwanaku, with two nights at Hotel Boutique Rosario La Paz Sur.",
+    itinerary: [
+      { day: "Day 1", title: "Welcome to La Paz", text: "Airport welcome, check-in at Rosario La Paz Sur and a gentle afternoon in the Valle de la Luna." },
+      { day: "Day 2", title: "The city by cable car", text: "Ride the red, yellow and silver lines over the city, the Witches' Market, San Francisco and lunch in a local market." },
+      { day: "Day 3", title: "Tiwanaku", text: "The Gate of the Sun and the Akapana pyramid with an archaeologist, then your flight or the road to Titicaca." },
+    ],
+    includes: ["2 nights at Hotel Boutique Rosario La Paz Sur", "Daily breakfast", "Airport transfers", "Cable-car pass & city guide", "Tiwanaku entry & guide"],
+    stays: [{ hotel: "rosario-la-paz-sur", nights: 2 }],
   },
 ];
 

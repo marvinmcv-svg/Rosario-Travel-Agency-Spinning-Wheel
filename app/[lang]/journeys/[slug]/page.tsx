@@ -6,6 +6,7 @@ import { Check, Minus } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import Itinerary from "@/components/Itinerary";
 import BookingPanel from "@/components/BookingPanel";
+import { WhereYouSleep } from "@/components/stays";
 import { FadeUp, SplitReveal } from "@/components/motion";
 import { journeys } from "@/lib/data";
 import { BOOKING_TERMS } from "@/lib/essentials";
@@ -80,6 +81,8 @@ export default async function JourneyPage({ params }: PageProps<"/[lang]/journey
 
           <h2 className="mt-24 font-display text-5xl">{J.route}</h2>
           <Itinerary days={j.itinerary} />
+
+          <WhereYouSleep journey={j} lang={lang} />
 
           <h2 className="mt-24 font-display text-5xl">{J.included}</h2>
           <FadeUp stagger={0.05} className="mt-8 grid gap-4 sm:grid-cols-2">

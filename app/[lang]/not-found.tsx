@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Wordmark } from "@/components/Preloader";
+import { Wordmark } from "@/components/brand";
 import { useI18n } from "@/components/i18n";
 
 /* A lost traveller lands here: same dusk sky as the entrance flyover. */

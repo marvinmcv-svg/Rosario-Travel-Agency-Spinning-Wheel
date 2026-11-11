@@ -77,8 +77,8 @@ const es: Dictionary = {
     tagline: "Diseñado entre la sal y el cielo.",
   },
   intro: {
-    flight: "Vuelo RT-591 · La Paz → Los Andes",
-    boarding: "Embarque inmediato",
+    flight: "Tejiendo tu viaje",
+    boarding: "La Paz · Copacabana · Uyuni",
     skip: "Saltar intro →",
     loading: "Cargando Rosario Travels",
   },

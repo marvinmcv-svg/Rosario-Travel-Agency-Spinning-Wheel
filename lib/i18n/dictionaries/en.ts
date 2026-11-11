@@ -79,8 +79,8 @@ const en = {
     tagline: "Designed between the salt and the sky.",
   },
   intro: {
-    flight: "Flight RT-591 · La Paz → The Andes",
-    boarding: "Now boarding",
+    flight: "Weaving your journey",
+    boarding: "La Paz · Copacabana · Uyuni",
     skip: "Skip intro →",
     loading: "Loading Rosario Travels",
   },

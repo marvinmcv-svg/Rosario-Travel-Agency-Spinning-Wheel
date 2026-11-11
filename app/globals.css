@@ -18,9 +18,14 @@
   --color-lake: #1d4b57;
   --color-lake-2: #2f6b78;
   --color-line: rgb(243 239 231 / 0.14);
+  /* Grupo Rosario brand colours (from the Hoteles Rosario mark) */
+  --color-rb-blue: #6a86a3;
+  --color-rb-sage: #989f7e;
+  --color-rb-ochre: #c77922;
 
   --font-display: var(--font-serif), "Times New Roman", serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-brand: var(--font-josefin), "Futura", "Century Gothic", sans-serif;
 
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-silk: cubic-bezier(0.65, 0, 0.35, 1);
@@ -166,3 +171,6 @@ html[data-menu="open"] [data-float] { opacity: 0 !important; pointer-events: non
 
 /* Destination photo strip: each copy slides its own width, so the loop is seamless */
 @keyframes marquee { to { transform: translateX(-100%); } }
+
+/* Preloader: the woven stage stays hidden until its timeline has set the start state (no flash before hydration). */
+.pl-pending [data-pl-stage] { visibility: hidden; }

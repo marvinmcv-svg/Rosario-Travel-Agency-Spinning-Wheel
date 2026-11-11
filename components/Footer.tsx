@@ -6,13 +6,15 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { actions } from "@/lib/store";
 import { waLink, WHATSAPP_DISPLAY } from "@/lib/contact";
 import { useI18n } from "./i18n";
+import { GROUP, hotels, staysText } from "@/lib/hotels";
 
 export default function Footer() {
   const word = useRef<HTMLParagraphElement>(null);
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
-  const { t, lp } = useI18n();
+  const { t, lp, lang } = useI18n();
   const f = t.footer;
+  const S = staysText(lang);
 
   // The wordmark rises out of the floor as you reach the end of the page.
   useEffect(() => {
@@ -53,6 +55,7 @@ export default function Footer() {
             <Link href={lp("/adventures")} className="link-line w-fit text-salt/75 hover:text-salt">{t.nav.adventures}</Link>
             <Link href={lp("/destinations")} className="link-line w-fit text-salt/75 hover:text-salt">{t.nav.destinations}</Link>
             <Link href={lp("/journeys")} className="link-line w-fit text-salt/75 hover:text-salt">{t.nav.journeys}</Link>
+            <Link href={lp("/stays")} className="link-line w-fit text-salt/75 hover:text-salt">{S.nav}</Link>
             <Link href={lp("/#spin")} className="link-line w-fit text-salt/75 hover:text-salt">{t.nav.spin}</Link>
             <Link href={lp("/essentials")} className="link-line w-fit text-salt/75 hover:text-salt">{f.essentials}</Link>
             <Link href={lp("/stories")} className="link-line w-fit text-salt/75 hover:text-salt">{t.nav.stories}</Link>
@@ -76,8 +79,32 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <div className="mx-auto mt-20 flex max-w-[1600px] flex-wrap justify-between gap-4 border-t border-line py-6 text-xs text-salt/40">
-        <span>© {new Date().getFullYear()} Rosario Travels. {f.licensed}</span>
+      {/* Grupo Rosario: our sister hotels */}
+      <div className="mx-auto mt-20 grid max-w-[1600px] gap-8 rounded-[28px] border border-line bg-ink-2 p-6 md:grid-cols-12 md:items-center md:p-10">
+        <div className="md:col-span-4">
+          <a href={GROUP.website} target="_blank" rel="noopener noreferrer" aria-label={GROUP.hotelsBrand}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/hoteles-rosario-inverted.png" alt={GROUP.hotelsBrand} width={636} height={250} className="h-auto w-48 md:w-56" />
+          </a>
+          <p className="mt-4 max-w-sm text-sm text-salt/60">{S.footerLine}</p>
+        </div>
+        <ul className="grid gap-4 text-sm sm:grid-cols-2 md:col-span-5">
+          {hotels.map((h) => (
+            <li key={h.slug}>
+              <a href={h.url} target="_blank" rel="noopener noreferrer" className="link-line text-salt/85 hover:text-salt">{h.name}</a>
+              <p className="text-xs text-salt/45">{h.town} · <a href={`tel:${h.phone.replace(/\s/g, "")}`} className="hover:text-salt">{h.phone}</a></p>
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-col gap-2 text-sm md:col-span-3">
+          <p className="eyebrow text-salt/40">{S.officeTitle}</p>
+          <a href={`mailto:${GROUP.email}`} className="link-line w-fit text-salt/75 hover:text-salt">{GROUP.email}</a>
+          <a href={`tel:${GROUP.phoneHref}`} className="link-line w-fit text-salt/75 hover:text-salt">{GROUP.phone}</a>
+          <a href={GROUP.instagram} target="_blank" rel="noopener noreferrer" className="link-line w-fit text-salt/75 hover:text-salt">Instagram {GROUP.instagramHandle}</a>
+        </div>
+      </div>
+      <div className="mx-auto mt-10 flex max-w-[1600px] flex-wrap justify-between gap-4 border-t border-line py-6 text-xs text-salt/40">
+        <span>© {new Date().getFullYear()} Rosario Travels · {S.groupLine}. {f.licensed}</span>
         <span className="flex flex-wrap gap-x-6 gap-y-2">
           <Link href={lp("/terms")} className="hover:text-salt">{f.terms}</Link>
           <Link href={lp("/privacy")} className="hover:text-salt">{f.privacy}</Link>

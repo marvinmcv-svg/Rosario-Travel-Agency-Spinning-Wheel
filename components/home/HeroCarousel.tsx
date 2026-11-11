@@ -8,7 +8,8 @@ import { gsap, ScrollTrigger, SplitText, prefersReducedMotion } from "@/lib/gsap
 import { heroSlides } from "@/lib/data";
 import { useI18n } from "../i18n";
 import { fmt } from "@/lib/i18n/fmt";
-import { READY_EVENT, siteReady, Wordmark } from "../Preloader";
+import { READY_EVENT, siteReady } from "../Preloader";
+import { Wordmark } from "../brand";
 import { openConcierge } from "../concierge-bus";
 
 const DURATION = 7; // seconds per destination

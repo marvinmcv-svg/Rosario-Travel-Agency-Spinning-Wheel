@@ -7,15 +7,17 @@ import { useEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { useLenis } from "./SmoothScroll";
 import { openConcierge } from "./concierge-bus";
-import { Wordmark } from "./Preloader";
+import { Wordmark } from "./brand";
+import { staysText } from "@/lib/hotels";
 import { useI18n } from "./i18n";
 import LocaleSwitcher from "./LocaleSwitcher";
 import type { Dictionary } from "@/lib/i18n/dictionaries/en";
 
-const linkDefs: { href: string; key: keyof Dictionary["nav"]; image: string }[] = [
+const linkDefs: { href: string; key: keyof Dictionary["nav"] | "stays"; image: string }[] = [
   { href: "/adventures", key: "adventures", image: "/images/atacama-dune.webp" },
   { href: "/destinations", key: "destinations", image: "/images/titicaca-sunset.webp" },
   { href: "/journeys", key: "journeys", image: "/images/uyuni-cruiser.webp" },
+  { href: "/stays", key: "stays", image: "/images/hotels/titicaca-hotel.webp" },
   { href: "/payments", key: "payByQr", image: "/images/uyuni-sunset.webp" },
   { href: "/#spin", key: "spin", image: "/images/vinicunca-ridge.webp" },
   { href: "/essentials", key: "essentials", image: "/images/laguna-colorada.webp" },
@@ -29,8 +31,9 @@ export default function Nav() {
   const overlay = useRef<HTMLDivElement>(null);
   const tl = useRef<gsap.core.Timeline | null>(null);
   const [open, setOpen] = useState(false);
-  const { t, lp } = useI18n();
-  const links = linkDefs.map((l) => ({ ...l, href: lp(l.href), label: t.nav[l.key] as string }));
+  const { t, lp, lang } = useI18n();
+  const S = staysText(lang);
+  const links = linkDefs.map((l) => ({ ...l, href: lp(l.href), label: l.key === "stays" ? S.nav : (t.nav[l.key] as string) }));
   const [preview, setPreview] = useState(linkDefs[0].image);
   const [solid, setSolid] = useState(false);
   // English pages are served from an internal /en route (proxy.ts rewrite), so strip it before comparing.
@@ -98,7 +101,7 @@ export default function Nav() {
               pathname === lp("/") && !solid && !open ? "pointer-events-none opacity-0" : "opacity-100"
             }`}
           >
-            <Wordmark className="text-[1.7rem] [text-shadow:0_1px_16px_rgb(10_11_12/0.55)] md:text-[1.9rem]" />
+            <Wordmark className="text-[1.75rem] [filter:drop-shadow(0_1px_10px_rgb(10_11_12/0.55))] md:text-[2rem]" />
             <span className="eyebrow hidden text-[0.6rem] text-salt/50 xl:inline">{t.nav.since}</span>
           </Link>
 
@@ -137,8 +140,8 @@ export default function Nav() {
         </nav>
       </header>
 
-      <div ref={overlay} className="fixed inset-0 z-40 bg-ink" data-lenis-prevent>
-        <div className="mx-auto grid h-full max-w-[1600px] grid-cols-1 gap-10 px-5 pb-10 pt-28 md:px-10 lg:grid-cols-[1.2fr_1fr]">
+      <div ref={overlay} className="fixed inset-0 z-40 overflow-y-auto bg-ink" data-lenis-prevent>
+        <div className="mx-auto grid min-h-full max-w-[1600px] grid-cols-1 gap-10 px-5 pb-10 pt-28 md:px-10 lg:grid-cols-[1.2fr_1fr]">
           <ul className="flex flex-col justify-center gap-1">
             {links.map((l, i) => (
               <li key={l.href} className="overflow-hidden">
@@ -149,8 +152,8 @@ export default function Nav() {
                   data-menu-link
                   className="group flex items-baseline gap-5 py-1"
                 >
-                  <span className="eyebrow w-8 text-salt/35">0{i + 1}</span>
-                  <span className="font-display text-[clamp(2.6rem,7vw,6.2rem)] leading-[1.02] transition duration-500 group-hover:translate-x-3 group-hover:italic group-hover:text-copper-2">
+                  <span className="eyebrow w-8 text-salt/35">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="font-display text-[clamp(2rem,min(6.2vw,6.6vh),5.4rem)] leading-[1.04] transition duration-500 group-hover:translate-x-3 group-hover:italic group-hover:text-copper-2">
                     {l.label}
                   </span>
                 </Link>

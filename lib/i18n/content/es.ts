@@ -170,6 +170,52 @@ const es: ContentOverlay = {
     },
   },
   journeys: {
+    "rosario-altiplano": {
+      title: "El Altiplano Rosario",
+      subtitle: "La Paz · Titicaca · Uyuni, en Hotel Rosario",
+      summary: "Las tres grandes maravillas de Bolivia con una sola familia cuidándote: dos noches en cada uno de nuestros hoteles, de los jardines de La Paz a la orilla del Titicaca y el borde del Salar.",
+      itinerary: [
+        { day: "Días 1–2", title: "La Paz", text: "Bienvenida en el aeropuerto y check-in en el Hotel Boutique Rosario La Paz Sur, más bajo y amable para la primera noche. Teleféricos sobre la ciudad, el Mercado de las Brujas y un día en Tiwanaku." },
+        { day: "Días 3–4", title: "Copacabana e Isla del Sol", text: "Por la orilla del lago hasta el Hotel Rosario Lago Titicaca. Atardecer desde el Cerro Calvario y lancha privada a la Isla del Sol y su escalinata inca." },
+        { day: "Día 5", title: "Vuelo a Uyuni", text: "Regreso a La Paz y vuelo corto a Uyuni. Check-in en el Hotel Rosario Uyuni y cena en el Tambo Colonial." },
+        { day: "Día 6", title: "Salar de Uyuni", text: "Cementerio de trenes, cooperativa salinera de Colchani, isla Incahuasi y atardecer sobre la sal. Observación de estrellas de vuelta en el hotel." },
+        { day: "Día 7", title: "Despedida", text: "Desayuno en Uyuni y vuelo a La Paz para tu conexión de regreso." },
+      ],
+      includes: ["6 noches en Hoteles Rosario (2 + 2 + 2)", "Desayuno diario", "Traslados privados y guías bilingües", "Vuelos La Paz–Uyuni", "Lancha a la Isla del Sol", "Día completo en el Salar en Land Cruiser", "Concierge Rosario 24/7"],
+    },
+    "copacabana-escape": {
+      title: "Escapada al Lago en Copacabana",
+      subtitle: "3 días · 2 noches en Hotel Rosario Lago Titicaca",
+      summary: "Una escapada corta a la orilla del lago sagrado: dos noches en habitación con vista al lago en Hotel Rosario, atardecer desde el Cerro Calvario y un día en la Isla del Sol.",
+      itinerary: [
+        { day: "Día 1", title: "La Paz → Copacabana", text: "Traslado privado por el altiplano y el estrecho de Tiquina. Check-in en tu habitación con vista al lago y subida al Cerro Calvario para el atardecer." },
+        { day: "Día 2", title: "Isla del Sol", text: "Lancha a la isla del sol: la escalinata inca, el templo de Pilko Kaina y almuerzo sobre el lago. Noche de vuelta en el hotel." },
+        { day: "Día 3", title: "Copacabana → La Paz", text: "Desayuno sobre el agua, la Basílica de Copacabana y los constructores de balsas de totora; luego regreso a La Paz." },
+      ],
+      includes: ["2 noches en Hotel Rosario Lago Titicaca", "Desayuno diario", "Traslados privados desde La Paz", "Lancha a la Isla del Sol", "Guía local"],
+    },
+    "uyuni-salt-and-stars": {
+      title: "Sal y Estrellas",
+      subtitle: "3 días · 2 noches en Hotel Rosario Uyuni",
+      summary: "El Salar con comodidad: un día completo sobre la sal en Land Cruiser, atardecer y estrellas, y dos noches cálidas en nuestro hotel ecológico con energía solar en Uyuni.",
+      itinerary: [
+        { day: "Día 1", title: "Uyuni", text: "Llegada y check-in en el Hotel Rosario Uyuni. El cementerio de trenes a la hora dorada y cena en el Tambo Colonial." },
+        { day: "Día 2", title: "Salar de Uyuni", text: "Cooperativa salinera de Colchani, el monumento del Dakar, la isla Incahuasi y sus cactus gigantes, fotos de perspectiva, atardecer y estrellas sobre la sal." },
+        { day: "Día 3", title: "Continuación", text: "Desayuno en el hotel y traslado al aeropuerto, o continúa al sur hacia las lagunas de Lípez." },
+      ],
+      includes: ["2 noches en Hotel Rosario Uyuni", "Desayuno diario y una cena", "Día completo en el Salar con chofer-guía", "Traslados al aeropuerto en Uyuni"],
+    },
+    "la-paz-heights": {
+      title: "La Paz desde las Alturas",
+      subtitle: "3 días · 2 noches en Hotel Rosario La Paz",
+      summary: "La sede de gobierno más alta del mundo, vista desde sus teleféricos, sus mercados y su vecina de 1.500 años, Tiwanaku, con dos noches en el Hotel Boutique Rosario La Paz Sur.",
+      itinerary: [
+        { day: "Día 1", title: "Bienvenida a La Paz", text: "Bienvenida en el aeropuerto, check-in en Rosario La Paz Sur y una tarde tranquila en el Valle de la Luna." },
+        { day: "Día 2", title: "La ciudad en teleférico", text: "Las líneas roja, amarilla y plateada sobre la ciudad, el Mercado de las Brujas, San Francisco y almuerzo en un mercado local." },
+        { day: "Día 3", title: "Tiwanaku", text: "La Puerta del Sol y la pirámide de Akapana con un arqueólogo; luego tu vuelo o el camino al Titicaca." },
+      ],
+      includes: ["2 noches en Hotel Boutique Rosario La Paz Sur", "Desayuno diario", "Traslados al aeropuerto", "Pase de teleférico y guía de ciudad", "Entrada y guía en Tiwanaku"],
+    },
     "andean-odyssey": {
       title: "La Odisea Andina",
       subtitle: "Uyuni · Titicaca · Machu Picchu",

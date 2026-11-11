@@ -16,7 +16,9 @@ A premium travel-agency website for **Rosario Travel**: private journeys to the 
 | **Rosario AI** | Concierge chat on every page. Streams answers from NVIDIA Nemotron when `NVIDIA_API_KEY` is set, otherwise from Claude when `ANTHROPIC_API_KEY` is set, otherwise uses a built-in offline concierge. Hands off to a human designer (creates an inquiry). |
 | **Team portal** (`/admin`) | Passcode-gated: overview KPIs + revenue chart, bookings (search/filter/drawer/status/CSV), inquiries inbox, journey pricing & visibility, wheel prizes & odds & leads, AI conversation log, audience export, settings. |
 
-| **Flyover entrance** | Plays once per browser session and never holds a visitor more than ~7 s (the film keeps loading in the background). An airliner crosses a dusk sky over the Andes, drawing a contrail; "Rosario Travels" is unveiled in its wake. While the site loads (real percentage), the contrail drifts away; then the sky lifts and the wordmark swooshes down into its permanent place in the hero. Skippable; reduced-motion safe. Code: `components/Preloader.tsx` (the shared `Wordmark` lives there too). |
+| **Loom entrance** | Plays once per browser session and never holds a visitor more than ~7 s (the film keeps loading in the background). Woven like an aguayo, the striped cloth used in every Hotel Rosario room: warp threads drop down the screen, weft bands shoot across in the brand colours with a diamond-patterned centre stripe (real loading % at the bottom), the cloth folds to a thread and the Grupo Rosario mark is woven stroke by stroke, then ROSARIO TRAVELS appears. To leave, the screen splits into four panels along the mark's quadrants while the hero opens behind them. Skippable; reduced-motion safe. Code: `components/Preloader.tsx`. |
+| **Brand** | The real Grupo Rosario / Hoteles Rosario mark (from gruporosario.com, linked from @hotelesrosariobolivia), redrawn as crisp SVG rectangles in `components/brand.tsx` (`RosarioMark`, `Wordmark` lockup), favicon `app/icon.svg`, original hotel logos in `public/brand/`. Brand colours `rb-blue`, `rb-sage`, `rb-ochre` in `app/globals.css`. |
+| **Hotels & stays** (`/stays`) | Our sister company Hoteles Rosario: the four hotels (Lago Titicaca, Uyuni, La Paz Sur, La Paz Centro) with real addresses, phones, official links, photos, WhatsApp booking, the reservations office and Instagram. Journeys that sleep in a Rosario hotel list it in `stays` (`lib/data.ts`), and their page shows **Where you'll sleep**. Four combined trips: *The Rosario Altiplano* (7 d), *Copacabana Lake Escape*, *Salt & Stars* (Uyuni) and *La Paz from the Heights*. Also on the home page, the About page, the footer and in Rosario AI's knowledge. Data and words: `lib/hotels.ts` (hotel descriptions in English and Spanish; other languages fall back to English). |
 | **Adrenaline tunnel** | Pinned CSS-3D fly-through on the home page: scroll pushes the camera along Z past the adventure panels, the pointer steers it. |
 | **Adventures** (`/adventures`) | Death Road, Huayna Potosí, Uyuni night convoy, sandboarding and more: 3D tilt cards, pulse meter and a "Book on WhatsApp" link on each. Data in `lib/adventures.ts`. |
 | **WhatsApp planner** | Four-step "build your message" CTA with a live phone preview; sends to **+591 77165787** (`lib/contact.ts`). Also a floating WhatsApp button on every page and on booking confirmations. |
@@ -96,6 +98,15 @@ What the server checks on every booking: the journey exists, the traveller count
 
 Rosario AI uses NVIDIA `nvidia/nemotron-3-ultra-550b-a55b` when `NVIDIA_API_KEY` is set (thinking off by default for fast replies; `NVIDIA_THINKING=true` turns it on; only the answer is streamed, never the reasoning). Without it, it uses `claude-opus-5-5` (override with `ROSARIO_MODEL`) at low effort for quick replies, with prompt caching on the catalogue system prompt and server-side refusal fallbacks enabled. Its knowledge comes from `lib/data.ts` via `lib/concierge.ts`.
 
+## End-to-end screen test
+
+`scripts/e2e.mjs` drives the built site in Chromium at desktop (1440×900), laptop (1024×700), iPhone 13, Pixel 7 and iPhone SE: the entrance (mark, lockup, hand-off in under 9 s, once per session, skip, reduced motion), every main page in English plus Spanish and Chinese samples (loads, has an h1, no console errors or failed requests, no broken images, no sideways scrolling), the hotels page and combined trips, "Where you'll sleep", a full booking of a combined trip with the WhatsApp hand-off, the menu, footer, About and Rosario AI's hotel knowledge. Screenshots go to `e2e-screenshots/`.
+
+```bash
+npm run build && npm start      # terminal 1
+npm run e2e                     # terminal 2 (needs Playwright: npm i -D playwright && npx playwright install chromium)
+```
+
 ## Translations
 
 | What | Where |
@@ -111,5 +122,7 @@ To add a language: add its code to `locales` and `localeMeta` in `lib/i18n/confi
 
 ## Content to review before launch
 **Booking conditions, privacy policy and travel essentials are sample text**: sensible defaults for a Bolivian operator, but have them checked by a lawyer and update the visa notes for your main markets before taking real deposits.
+
+Prices of the combined hotel trips (`lib/data.ts`) are sample figures: confirm them with Hoteles Rosario before launch, together with which photo belongs to which hotel (`public/images/hotels/`, from gruporosario.com).
 
 The founder story, statistics, studio addresses, testimonials and prices are placeholder copy written for the design — replace them with Rosario's real details in `lib/data.ts`, `app/[lang]/about/page.tsx` and `app/[lang]/contact/page.tsx` (plus the translations in `lib/i18n/content/`).

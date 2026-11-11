@@ -1,13 +1,17 @@
 import PageHero from "@/components/PageHero";
 import { Counter, FadeUp, ImageReveal, ScrubWords, SplitReveal } from "@/components/motion";
 import { pageI18n, pageMeta } from "@/lib/i18n/server";
+import Link from "next/link";
+import { GROUP, hotels, staysText } from "@/lib/hotels";
+import { localePath } from "@/lib/i18n/config";
 
 export const generateMetadata = ({ params }: PageProps<"/[lang]/about">) =>
   pageMeta(params, "/about", (t) => ({ title: t.about.metaTitle, description: t.about.metaDescription }));
 
 export default async function AboutPage({ params }: PageProps<"/[lang]/about">) {
-  const { t } = await pageI18n(params);
+  const { t, lang } = await pageI18n(params);
   const A = t.about;
+  const S = staysText(lang);
   return (
     <>
       <PageHero image="/images/titicaca-dawn.webp" eyebrow={A.eyebrow} title={A.title} height="h-[80svh]" />
@@ -42,6 +46,27 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
             ))}
           </FadeUp>
         </div>
+      </section>
+
+      {/* Grupo Rosario: the travel company and the hotels are one family */}
+      <section className="mx-auto grid max-w-[1600px] gap-10 px-5 pt-32 md:grid-cols-12 md:px-10" data-testid="about-group">
+        <div className="md:col-span-5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/hoteles-rosario-inverted.png" alt={GROUP.hotelsBrand} width={636} height={250} className="h-auto w-56 md:w-72" />
+          <SplitReveal className="mt-10 font-display text-5xl leading-[1]">{S.aboutTitle}</SplitReveal>
+          <p className="mt-6 leading-relaxed text-salt/70">{S.aboutText}</p>
+          <Link href={localePath(lang, "/stays")} className="mt-8 inline-flex rounded-full bg-salt px-6 py-3.5 text-sm font-medium text-ink transition hover:bg-copper">{S.homeCta}</Link>
+        </div>
+        <FadeUp stagger={0.08} className="grid gap-4 sm:grid-cols-2 md:col-span-6 md:col-start-7">
+          {hotels.map((h) => (
+            <Link key={h.slug} href={localePath(lang, `/stays#${h.slug}`)} className="group rounded-[22px] border border-line bg-ink-2 p-6 transition hover:border-salt/30">
+              <p className="eyebrow text-salt/45">{h.town} · {h.stars}★</p>
+              <p className="mt-3 font-display text-2xl leading-tight">{h.name}</p>
+              <p className="mt-2 text-sm italic text-salt/60">{S.hotels[h.slug].tagline}</p>
+              <p className="mt-4 text-xs text-salt/45">{h.phone}</p>
+            </Link>
+          ))}
+        </FadeUp>
       </section>
 
       <section className="mx-auto grid max-w-[1600px] grid-cols-2 gap-10 px-5 py-32 md:grid-cols-4 md:px-10">

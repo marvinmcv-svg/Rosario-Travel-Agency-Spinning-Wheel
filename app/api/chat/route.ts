@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     if (lang === defaultLocale) return offlineReply(last);
     const { t, content } = await getI18n(lang);
     const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
-    return localizedOfflineReply(last, t, content, usd);
+    return localizedOfflineReply(last, t, content, usd, lang);
   };
   const languageNote = `The visitor is browsing the ${localeMeta[lang].english} version of the site. Always reply in ${localeMeta[lang].english}, whatever language the catalogue above is written in. Keep destination and journey names as they appear, and keep page links (such as /journeys/andean-odyssey) unchanged.`;
 

@@ -77,8 +77,8 @@ const fr: Dictionary = {
     tagline: "Conçu entre le sel et le ciel.",
   },
   intro: {
-    flight: "Vol RT-591 · La Paz → Les Andes",
-    boarding: "Embarquement immédiat",
+    flight: "Nous tissons votre voyage",
+    boarding: "La Paz · Copacabana · Uyuni",
     skip: "Passer l'intro →",
     loading: "Chargement de Rosario Travels",
   },

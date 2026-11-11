@@ -77,8 +77,8 @@ const zh: Dictionary = {
     tagline: "诞生于盐与天空之间。",
   },
   intro: {
-    flight: "航班 RT-591 · 拉巴斯 → 安第斯",
-    boarding: "正在登机",
+    flight: "正在编织您的旅程",
+    boarding: "拉巴斯 · 科帕卡巴纳 · 乌尤尼",
     skip: "跳过片头 →",
     loading: "Rosario Travels 加载中",
   },

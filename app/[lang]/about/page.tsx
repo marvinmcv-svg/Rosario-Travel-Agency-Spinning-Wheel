@@ -77,7 +77,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
           [98, "%"],
         ] as const).map(([n, s], i) => (
           <div key={A.stats[i]}>
-            <p className="font-display text-6xl sm:text-7xl"><Counter to={n} suffix={s} /></p>
+            <p className="font-display text-5xl min-[380px]:text-6xl sm:text-7xl"><Counter to={n} suffix={s} /></p>
             <p className="mt-3 text-sm text-salt/60">{A.stats[i]}</p>
           </div>
         ))}

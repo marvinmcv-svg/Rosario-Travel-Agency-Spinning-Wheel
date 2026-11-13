@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { CalendarCheck, Disc3, Inbox, LayoutDashboard, LogOut, Map, Menu, MessagesSquare, Settings, Users, X } from "lucide-react";
+import { BedDouble, CalendarCheck, CalendarRange, Disc3, Hotel, Inbox, LayoutDashboard, LogOut, Map, Menu, MessagesSquare, Settings, Users, X } from "lucide-react";
 import { gsap } from "@/lib/gsap";
 import { connectAdmin, useDB } from "@/lib/store";
 
@@ -11,6 +11,9 @@ const nav = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck, badge: "bookings" as const },
   { href: "/admin/inquiries", label: "Inquiries", icon: Inbox, badge: "inquiries" as const },
+  { href: "/admin/stays", label: "Hotel stays", icon: BedDouble, badge: "stays" as const },
+  { href: "/admin/occupancy", label: "Occupancy", icon: CalendarRange },
+  { href: "/admin/hotels", label: "Hotels & rates", icon: Hotel },
   { href: "/admin/journeys", label: "Journeys", icon: Map },
   { href: "/admin/wheel", label: "Spin the Andes", icon: Disc3 },
   { href: "/admin/conversations", label: "Rosario AI", icon: MessagesSquare },
@@ -61,7 +64,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   const content = useRef<HTMLDivElement>(null);
   const newBookings = useDB((db) => db.bookings).filter((b) => b.status === "new").length;
   const openInquiries = useDB((db) => db.inquiries).filter((q) => q.status === "open").length;
-  const badges = { bookings: newBookings, inquiries: openInquiries };
+  const newStays = useDB((db) => db.stays).filter((s) => s.status === "new").length;
+  const badges = { bookings: newBookings, inquiries: openInquiries, stays: newStays };
 
   useEffect(() => {
     fetch("/api/admin/session")
@@ -79,7 +83,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   // Each section eases in so moving around the portal feels continuous.
   useEffect(() => {
     setDrawer(false);
-    if (content.current) gsap.fromTo(content.current, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.6 });
+    if (content.current) gsap.fromTo(content.current, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.6, clearProps: "transform" }); // a leftover transform would trap the full-screen drawers
   }, [pathname, authed, loaded]);
 
   if (authed === null) return <div className="min-h-svh bg-ink" />;

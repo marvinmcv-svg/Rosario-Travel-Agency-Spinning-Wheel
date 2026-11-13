@@ -26,7 +26,7 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
   return <div className={`admin-card p-5 md:p-6 ${className}`}>{children}</div>;
 }
 
-export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) {
+export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: ReactNode }) {
   return (
     <Card>
       <p className="text-xs text-salt/50">{label}</p>

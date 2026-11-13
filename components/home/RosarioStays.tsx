@@ -39,6 +39,13 @@ export default function RosarioStays() {
             >
               {S.homeCta} <ArrowUpRight className="h-4 w-4 transition group-hover:rotate-45" />
             </Link>
+            <Link
+              href={lp("/stays#book")}
+              className="mt-7 ml-3 inline-flex items-center gap-2 rounded-full border border-salt/25 px-6 py-3.5 text-sm transition hover:border-salt"
+              data-testid="home-book-stay"
+            >
+              {S.book.eyebrow}
+            </Link>
           </div>
         </div>
 

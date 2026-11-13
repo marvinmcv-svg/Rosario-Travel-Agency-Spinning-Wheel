@@ -6,7 +6,6 @@
    (lib/data.ts); the journey page and /stays read it from here.
    ────────────────────────────────────────────────────────────── */
 
-import type { Locale } from "./i18n/config";
 
 export const GROUP = {
   name: "Grupo Rosario",
@@ -38,7 +37,21 @@ export type Hotel = {
   destination?: string;
   image: string;
   gallery: string[];
+  /** Room types: sample rates in USD per room per night, breakfast included. Confirm with the hotels. */
+  rooms: RoomType[];
 };
+
+export type RoomType = {
+  id: string;
+  guests: number; // maximum guests per room
+  size?: number; // m²
+  rate: number; // USD per room per night
+  count: number; // rooms of this type in the hotel
+  image?: string;
+};
+
+/** Extras a guest can order with a stay. `per`: once per stay, per guest, or per room. */
+export type Extra = { id: string; price: number; per: "stay" | "guest" | "room"; hotels: HotelSlug[] };
 
 const img = (n: string) => `/images/hotels/${n}.webp`;
 
@@ -56,6 +69,12 @@ export const hotels: Hotel[] = [
     destination: "lake-titicaca",
     image: img("titicaca-hotel"),
     gallery: [img("titicaca-hotel-gardens"), img("titicaca-room"), img("titicaca-cabin")],
+    rooms: [
+      { id: "tt-premium", guests: 2, rate: 100, count: 8, image: img("titicaca-room") },
+      { id: "tt-family", guests: 4, rate: 150, count: 6, image: img("titicaca-hotel-gardens") },
+      { id: "tt-junior", guests: 4, rate: 190, count: 3, image: img("titicaca-hotel") },
+      { id: "tt-cabin", guests: 2, rate: 170, count: 1, image: img("titicaca-cabin") },
+    ],
   },
   {
     slug: "rosario-uyuni",
@@ -70,6 +89,11 @@ export const hotels: Hotel[] = [
     destination: "salar-de-uyuni",
     image: img("uyuni-hotel"),
     gallery: [img("uyuni-hotel-dusk"), img("uyuni-restaurant"), img("uyuni-detail")],
+    rooms: [
+      { id: "uy-single", guests: 1, rate: 85, count: 10, image: img("uyuni-detail") },
+      { id: "uy-king", guests: 2, rate: 110, count: 18, image: img("uyuni-hotel-dusk") },
+      { id: "uy-family", guests: 4, rate: 150, count: 16, image: img("uyuni-hotel") },
+    ],
   },
   {
     slug: "rosario-la-paz-sur",
@@ -83,6 +107,11 @@ export const hotels: Hotel[] = [
     url: "https://www.gruporosario.com/es/hotel-boutique-rosario-la-paz-sur/",
     image: img("lapaz-sur-hotel"),
     gallery: [img("lapaz-sur-room"), img("lapaz-breakfast")],
+    rooms: [
+      { id: "sur-garden", guests: 2, rate: 95, count: 10, image: img("lapaz-sur-room") },
+      { id: "sur-junior", guests: 4, size: 40, rate: 130, count: 12, image: img("lapaz-sur-hotel") },
+      { id: "sur-superior", guests: 4, size: 46, rate: 160, count: 8, image: img("lapaz-breakfast") },
+    ],
   },
   {
     slug: "rosario-la-paz-centro",
@@ -97,283 +126,150 @@ export const hotels: Hotel[] = [
     destination: "tiwanaku",
     image: img("lapaz-centro-patio"),
     gallery: [img("lapaz-breakfast")],
+    rooms: [
+      { id: "ce-double", guests: 2, rate: 60, count: 15, image: img("lapaz-centro-patio") },
+      { id: "ce-twin", guests: 2, rate: 60, count: 10, image: img("lapaz-centro-patio") },
+      { id: "ce-triple", guests: 3, rate: 80, count: 6, image: img("lapaz-breakfast") },
+    ],
   },
 ];
 
 export const getHotel = (slug: string) => hotels.find((h) => h.slug === slug);
 
-/* ── Words ─────────────────────────────────────────────────────── */
+export const extras: Extra[] = [
+  { id: "transfer-lpb", price: 35, per: "stay", hotels: ["rosario-la-paz-sur", "rosario-la-paz-centro"] },
+  { id: "transfer-uyu", price: 15, per: "stay", hotels: ["rosario-uyuni"] },
+  { id: "transfer-copa", price: 90, per: "stay", hotels: ["rosario-lago-titicaca"] },
+  { id: "salar", price: 60, per: "guest", hotels: ["rosario-uyuni"] },
+  { id: "tambo-dinner", price: 28, per: "guest", hotels: ["rosario-uyuni"] },
+  { id: "isla-sol", price: 25, per: "guest", hotels: ["rosario-lago-titicaca"] },
+  { id: "telef", price: 30, per: "guest", hotels: ["rosario-la-paz-sur", "rosario-la-paz-centro"] },
+  { id: "tiwanaku", price: 55, per: "guest", hotels: ["rosario-la-paz-sur", "rosario-la-paz-centro"] },
+  { id: "late-checkout", price: 25, per: "room", hotels: ["rosario-lago-titicaca", "rosario-uyuni", "rosario-la-paz-sur", "rosario-la-paz-centro"] },
+];
 
-type HotelText = { tagline: string; summary: string; features: string[] };
+export const getRoom = (hotel: string, room: string) => getHotel(hotel)?.rooms.find((r) => r.id === room);
+export const extrasFor = (hotel: string) => extras.filter((e) => e.hotels.includes(hotel as HotelSlug));
 
-type StaysDict = {
-  nav: string;
-  eyebrow: string;
-  title: string;
-  intro: string;
-  groupLine: string;
-  pillars: [string, string][];
-  hotelsTitle: string;
-  combosEyebrow: string;
-  combosTitle: string;
-  combosIntro: string;
-  nights: string; // "{n} nights"
-  night: string; // "1 night"
-  stars: string; // "{n}-star"
-  call: string;
-  website: string;
-  bookStay: string;
-  bookStayMsg: string; // WhatsApp text: "{hotel}"
-  viewJourney: string;
-  includesStay: string; // badge on journey cards
-  whereYouSleep: string;
-  whereYouSleepIntro: string;
-  officeTitle: string;
-  follow: string;
-  aboutTitle: string;
-  aboutText: string;
-  homeEyebrow: string;
-  homeTitle: string;
-  homeText: string;
-  homeCta: string;
-  footerLine: string;
-  hotels: Record<HotelSlug, HotelText>;
-};
+/* ── Stay pricing & availability (shared by the website, the portal and the server) ── */
 
-const en: StaysDict = {
-  nav: "Hotels & stays",
-  eyebrow: "Hoteles Rosario · our sister company",
-  title: "Travel with us. Sleep with us.",
-  intro:
-    "Rosario Travels is part of Grupo Rosario, the Bolivian family behind Hoteles Rosario: a collection of themed, eco-friendly hotels where true elegance lives in handcrafted detail. Every journey that stops in La Paz, Copacabana or Uyuni can sleep in one of our own hotels, booked together, with one team looking after you from the airport to the salt flat.",
-  groupLine: "A Grupo Rosario company",
-  pillars: [
-    ["Exceptional locations", "On the shore of Lake Titicaca, in the heart of La Paz and at the edge of the Salar de Uyuni."],
-    ["Andean by design", "Aguayo textiles, local stone and art from the Altiplano in every room."],
-    ["Eco-friendly", "Solar power and radiant floor heating in Uyuni; passive-solar suites in La Paz."],
-    ["One team", "Your guide, your driver and your hotel talk to each other, because they are one family."],
-  ],
-  hotelsTitle: "Our hotels",
-  combosEyebrow: "Journeys + stays",
-  combosTitle: "Trips that sleep at Hotel Rosario",
-  combosIntro: "Transfers, guides and nights in our hotels in one booking. Every one can be tailored, extended or done privately.",
-  nights: "{n} nights",
-  night: "1 night",
-  stars: "{n}-star",
-  call: "Call the hotel",
-  website: "Official site",
-  bookStay: "Book this hotel",
-  bookStayMsg: "Hello Rosario! I'd like to book a stay at {hotel}. Could you send me availability and rates?",
-  viewJourney: "View journey",
-  includesStay: "Stay at Hotel Rosario",
-  whereYouSleep: "Where you'll sleep",
-  whereYouSleepIntro: "Nights in our own Hoteles Rosario, part of Grupo Rosario, are included in this journey.",
-  officeTitle: "Hotel reservations office",
-  follow: "Follow the hotels",
-  aboutTitle: "Part of Grupo Rosario",
-  aboutText:
-    "Rosario Travels and Hoteles Rosario are one Bolivian family. Our hotels in Copacabana, La Paz and Uyuni are where our travellers rest between adventures, and the reason we can promise the same care at every step.",
-  homeEyebrow: "Hoteles Rosario",
-  homeTitle: "The trip and the bed, from one family.",
-  homeText: "Our sister hotels sit exactly where our journeys go: the shore of Titicaca, the edge of the Salar and the heart of La Paz.",
-  homeCta: "Explore hotels & stays",
-  footerLine: "Rosario Travels is a Grupo Rosario company, with Hoteles Rosario in Copacabana, La Paz and Uyuni.",
-  hotels: {
-    "rosario-lago-titicaca": {
-      tagline: "On the shore of the sacred lake.",
-      summary:
-        "A four-star hotel with personality and cultural identity, right on the shore of Lake Titicaca in Copacabana. Every room has its own Andean décor, and many open onto balconies over the water.",
-      features: ["Lake-view rooms, suites and a private cabin", "Sunrise and sunset over Titicaca from your balcony", "Guided walks and boats to Isla del Sol", "Steps from the Basilica and Cerro Calvario"],
-    },
-    "rosario-uyuni": {
-      tagline: "An eco hotel at the edge of the salt.",
-      summary:
-        "A themed eco hotel in the town of Uyuni that celebrates the culture and traditions of the Altiplano. Forty-four rooms with radiant floor heating, solar power, and a restaurant to come back to after a day on the Salar.",
-      features: ["44 rooms with radiant floor heating", "Solar-powered, respecting the purity of the Salar", "Tambo Colonial restaurant", "Aguayo textiles in art and lighting"],
-    },
-    "rosario-la-paz-sur": {
-      tagline: "Calm, gardens and the city at your feet.",
-      summary:
-        "A boutique hotel in Calacoto, in the quiet Zona Sur of La Paz at 3,300 m: a nine-storey tower wrapped in gardens, with suites of up to 46 m² and floor-to-ceiling windows over the city.",
-      features: ["Suites of 40–46 m² with sitting rooms", "Panoramic city and garden views", "Lower altitude: a gentler first night", "Restaurants and an open-air mall nearby"],
-    },
-    "rosario-la-paz-centro": {
-      tagline: "In the heart of old La Paz.",
-      summary:
-        "Our classic hotel in the centre of La Paz, minutes from the Basilica of San Francisco and a few steps from the Witches' Market: the best base for walking the old city.",
-      features: ["Walk to San Francisco and the Witches' Market", "Colonial patios", "Andean breakfast", "Easy start for Tiwanaku and Titicaca"],
-    },
-  },
+/** Portal edits on top of the defaults above. */
+export type HotelOverride = { closed?: boolean; rooms?: Record<string, { rate?: number; count?: number }> };
+export type HotelOverrides = Record<string, HotelOverride>;
+
+export const roomRate = (hotel: string, room: string, o?: HotelOverrides) => o?.[hotel]?.rooms?.[room]?.rate ?? getRoom(hotel, room)?.rate ?? 0;
+export const roomCount = (hotel: string, room: string, o?: HotelOverrides) => o?.[hotel]?.rooms?.[room]?.count ?? getRoom(hotel, room)?.count ?? 0;
+
+const DAY = 86400000;
+const parse = (d: string) => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
+export const isoDay = (t: number) => new Date(t).toISOString().slice(0, 10);
+export const addDaysIso = (d: string, n: number) => isoDay(parse(d) + n * DAY);
+export const isIsoDate = (d: unknown): d is string => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d) && !Number.isNaN(parse(d));
+export const nightsBetween = (checkIn: string, checkOut: string) => Math.round((parse(checkOut) - parse(checkIn)) / DAY);
+/** Every night of a stay, as the date of that night. */
+export const nightsOf = (checkIn: string, checkOut: string) =>
+  Array.from({ length: Math.max(0, nightsBetween(checkIn, checkOut)) }, (_, i) => addDaysIso(checkIn, i));
+/** Today in Bolivia (UTC−4), as YYYY-MM-DD. */
+export const todayBolivia = () => isoDay(Date.now() - 4 * 3600000);
+
+export type StayLine = { id: string; qty: number };
+export type StayQuote = { nights: number; roomTotal: number; extrasTotal: number; total: number };
+
+/** Price of a stay: room rate × nights × rooms, plus extras. */
+export function quoteStay(
+  q: { hotel: string; room: string; rooms: number; guests: number; checkIn: string; checkOut: string; extras?: StayLine[] },
+  o?: HotelOverrides,
+): StayQuote {
+  const nights = Math.max(0, nightsBetween(q.checkIn, q.checkOut));
+  const roomTotal = roomRate(q.hotel, q.room, o) * nights * q.rooms;
+  const extrasTotal = (q.extras ?? []).reduce((sum, l) => {
+    const e = extras.find((x) => x.id === l.id && x.hotels.includes(q.hotel as HotelSlug));
+    if (!e || !(l.qty > 0)) return sum;
+    const unit = e.per === "guest" ? q.guests : e.per === "room" ? q.rooms : 1;
+    return sum + e.price * unit * Math.min(Math.round(l.qty), 20);
+  }, 0);
+  return { nights, roomTotal, extrasTotal, total: roomTotal + extrasTotal };
+}
+
+/** A booking as far as availability is concerned. */
+export type Occupying = { id?: string; hotel: string; room: string; rooms: number; checkIn: string; checkOut: string; status: string };
+const holds = (b: Occupying) => b.status !== "cancelled" && b.status !== "no-show";
+
+/** Rooms of one type booked on a given night. */
+export const bookedOn = (list: Occupying[], hotel: string, room: string, night: string) =>
+  list
+    .filter((b) => holds(b) && b.hotel === hotel && b.room === room && b.checkIn <= night && night < b.checkOut)
+    .reduce((n, b) => n + b.rooms, 0);
+
+/** Rooms of each type still free for every night of a stay (0 when the hotel is closed to bookings). */
+export function availability(list: Occupying[], hotel: string, checkIn: string, checkOut: string, o?: HotelOverrides): Record<string, number> {
+  const h = getHotel(hotel);
+  if (!h) return {};
+  const nights = nightsOf(checkIn, checkOut);
+  return Object.fromEntries(
+    h.rooms.map((r) => {
+      const total = roomCount(hotel, r.id, o);
+      const worst = nights.reduce((m, n) => Math.max(m, bookedOn(list, hotel, r.id, n)), 0);
+      return [r.id, o?.[hotel]?.closed ? 0 : Math.max(0, total - worst)];
+    }),
+  );
+}
+
+/** Stay requests reach the team as a WhatsApp message. This line lets the portal import them exactly. */
+export function stayCode(b: { id: string; hotel: string; room: string; rooms: number; guests: number; checkIn: string; checkOut: string; total: number; extras?: StayLine[] }) {
+  const ex = (b.extras ?? []).filter((e) => e.qty > 0).map((e) => `${e.id}x${e.qty}`).join(",");
+  return `#${b.id} ${b.hotel}/${b.room}x${b.rooms} ${b.checkIn}>${b.checkOut} ${b.guests}p $${b.total}${ex ? ` +${ex}` : ""}`;
+}
+
+export type ParsedStay = {
+  id: string;
+  hotel: string;
+  room: string;
+  rooms: number;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  total: number;
+  extras: StayLine[];
+  name?: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
 };
 
-const es: StaysDict = {
-  nav: "Hoteles y estadías",
-  eyebrow: "Hoteles Rosario · nuestra empresa hermana",
-  title: "Viaja con nosotros. Descansa con nosotros.",
-  intro:
-    "Rosario Travels forma parte de Grupo Rosario, la familia boliviana detrás de Hoteles Rosario: una colección de hoteles temáticos y ecoamigables donde la verdadera elegancia reside en la autenticidad de los detalles artesanales. Cada viaje que pasa por La Paz, Copacabana o Uyuni puede dormir en uno de nuestros hoteles, reservado en conjunto y con un solo equipo cuidándote del aeropuerto al salar.",
-  groupLine: "Una empresa de Grupo Rosario",
-  pillars: [
-    ["Ubicaciones excepcionales", "A orillas del lago Titicaca, en el corazón de La Paz y al borde del Salar de Uyuni."],
-    ["Diseño andino", "Aguayos, piedra local y arte del altiplano en cada habitación."],
-    ["Ecoamigables", "Energía solar y calefacción por losa radiante en Uyuni; suites con eficiencia solar en La Paz."],
-    ["Un solo equipo", "Tu guía, tu chofer y tu hotel hablan entre sí, porque son una misma familia."],
-  ],
-  hotelsTitle: "Nuestros hoteles",
-  combosEyebrow: "Viajes + estadías",
-  combosTitle: "Viajes que duermen en Hotel Rosario",
-  combosIntro: "Traslados, guías y noches en nuestros hoteles en una sola reserva. Todos se pueden personalizar, extender o hacer en privado.",
-  nights: "{n} noches",
-  night: "1 noche",
-  stars: "{n} estrellas",
-  call: "Llamar al hotel",
-  website: "Sitio oficial",
-  bookStay: "Reservar este hotel",
-  bookStayMsg: "¡Hola Rosario! Quisiera reservar una estadía en {hotel}. ¿Me envían disponibilidad y tarifas?",
-  viewJourney: "Ver viaje",
-  includesStay: "Estadía en Hotel Rosario",
-  whereYouSleep: "Dónde dormirás",
-  whereYouSleepIntro: "Este viaje incluye noches en nuestros propios Hoteles Rosario, parte de Grupo Rosario.",
-  officeTitle: "Central de reservas de los hoteles",
-  follow: "Sigue a los hoteles",
-  aboutTitle: "Parte de Grupo Rosario",
-  aboutText:
-    "Rosario Travels y Hoteles Rosario son una misma familia boliviana. Nuestros hoteles en Copacabana, La Paz y Uyuni son donde descansan nuestros viajeros entre aventuras, y la razón por la que podemos prometer el mismo cuidado en cada paso.",
-  homeEyebrow: "Hoteles Rosario",
-  homeTitle: "El viaje y la cama, de una misma familia.",
-  homeText: "Nuestros hoteles hermanos están justo donde van nuestros viajes: la orilla del Titicaca, el borde del Salar y el corazón de La Paz.",
-  homeCta: "Ver hoteles y estadías",
-  footerLine: "Rosario Travels es una empresa de Grupo Rosario, con Hoteles Rosario en Copacabana, La Paz y Uyuni.",
-  hotels: {
-    "rosario-lago-titicaca": {
-      tagline: "A orillas del lago sagrado.",
-      summary:
-        "Un hotel de 4 estrellas con encanto, personalidad e identidad cultural, justo a orillas del lago Titicaca en Copacabana. Cada habitación tiene una decoración andina distinta y muchas se abren a balcones sobre el agua.",
-      features: ["Habitaciones con vista al lago, suites y una cabaña privada", "Amaneceres y atardeceres sobre el Titicaca desde tu balcón", "Caminatas guiadas y lanchas a la Isla del Sol", "A pasos de la Basílica y del Cerro Calvario"],
-    },
-    "rosario-uyuni": {
-      tagline: "Un hotel ecológico al borde de la sal.",
-      summary:
-        "Un hotel ecológico temático en Uyuni que refleja la cultura y las tradiciones del altiplano. Cuarenta y cuatro habitaciones con calefacción por losa radiante, energía solar y un restaurante al que volver después de un día en el Salar.",
-      features: ["44 habitaciones con calefacción por losa radiante", "Energía solar, respetando la pureza del Salar", "Restaurante Tambo Colonial", "Aguayos en arte y luminarias"],
-    },
-    "rosario-la-paz-sur": {
-      tagline: "Calma, jardines y la ciudad a tus pies.",
-      summary:
-        "Un hotel boutique en Calacoto, en la tranquila Zona Sur de La Paz a 3.300 m: una torre de nueve pisos rodeada de jardines, con suites de hasta 46 m² y ventanales de piso a techo sobre la ciudad.",
-      features: ["Suites de 40–46 m² con sala de estar", "Vistas panorámicas a la ciudad y los jardines", "Menor altitud: una primera noche más suave", "Restaurantes y un mall a cielo abierto cerca"],
-    },
-    "rosario-la-paz-centro": {
-      tagline: "En el corazón del antiguo La Paz.",
-      summary:
-        "Nuestro hotel clásico en el centro de La Paz, a minutos de la Basílica de San Francisco y a pocos pasos del Mercado de las Brujas: la mejor base para caminar la ciudad antigua.",
-      features: ["A pie de San Francisco y el Mercado de las Brujas", "Patios coloniales", "Desayuno andino", "Salida fácil a Tiwanaku y el Titicaca"],
-    },
-  },
-};
+const CODE = /#(RS-[A-Z0-9]{4,12})\s+([a-z-]+)\/([a-z-]+)x(\d+)\s+(\d{4}-\d{2}-\d{2})>(\d{4}-\d{2}-\d{2})\s+(\d+)p\s+\$(\d+(?:\.\d+)?)(?:\s+\+([a-z0-9x,-]+))?/;
 
-/* Portuguese, French, German and Chinese: interface words translated;
-   hotel descriptions use English until a native speaker reviews them. */
-const pt: StaysDict = {
-  ...en,
-  nav: "Hotéis e estadias",
-  eyebrow: "Hoteles Rosario · nossa empresa irmã",
-  title: "Viaje conosco. Durma conosco.",
-  groupLine: "Uma empresa do Grupo Rosario",
-  hotelsTitle: "Nossos hotéis",
-  combosEyebrow: "Viagens + estadias",
-  combosTitle: "Viagens que dormem no Hotel Rosario",
-  nights: "{n} noites",
-  night: "1 noite",
-  stars: "{n} estrelas",
-  call: "Ligar para o hotel",
-  website: "Site oficial",
-  bookStay: "Reservar este hotel",
-  bookStayMsg: "Olá Rosario! Gostaria de reservar uma estadia no {hotel}. Podem me enviar disponibilidade e tarifas?",
-  viewJourney: "Ver viagem",
-  includesStay: "Estadia no Hotel Rosario",
-  whereYouSleep: "Onde você vai dormir",
-  officeTitle: "Central de reservas dos hotéis",
-  follow: "Siga os hotéis",
-  aboutTitle: "Parte do Grupo Rosario",
-  homeTitle: "A viagem e a cama, da mesma família.",
-  homeCta: "Ver hotéis e estadias",
-};
-const fr: StaysDict = {
-  ...en,
-  nav: "Hôtels & séjours",
-  eyebrow: "Hoteles Rosario · notre société sœur",
-  title: "Voyagez avec nous. Dormez chez nous.",
-  groupLine: "Une société du Grupo Rosario",
-  hotelsTitle: "Nos hôtels",
-  combosEyebrow: "Voyages + séjours",
-  combosTitle: "Des voyages qui dorment à l'Hotel Rosario",
-  nights: "{n} nuits",
-  night: "1 nuit",
-  stars: "{n} étoiles",
-  call: "Appeler l'hôtel",
-  website: "Site officiel",
-  bookStay: "Réserver cet hôtel",
-  bookStayMsg: "Bonjour Rosario ! J'aimerais réserver un séjour à l'{hotel}. Pouvez-vous m'envoyer les disponibilités et les tarifs ?",
-  viewJourney: "Voir le voyage",
-  includesStay: "Séjour à l'Hotel Rosario",
-  whereYouSleep: "Où vous dormirez",
-  officeTitle: "Centrale de réservation des hôtels",
-  follow: "Suivre les hôtels",
-  aboutTitle: "Membre du Grupo Rosario",
-  homeTitle: "Le voyage et le lit, d'une même famille.",
-  homeCta: "Voir les hôtels et séjours",
-};
-const de: StaysDict = {
-  ...en,
-  nav: "Hotels & Aufenthalte",
-  eyebrow: "Hoteles Rosario · unser Schwesterunternehmen",
-  title: "Reisen Sie mit uns. Schlafen Sie bei uns.",
-  groupLine: "Ein Unternehmen der Grupo Rosario",
-  hotelsTitle: "Unsere Hotels",
-  combosEyebrow: "Reisen + Aufenthalte",
-  combosTitle: "Reisen mit Nächten im Hotel Rosario",
-  nights: "{n} Nächte",
-  night: "1 Nacht",
-  stars: "{n} Sterne",
-  call: "Hotel anrufen",
-  website: "Offizielle Website",
-  bookStay: "Dieses Hotel buchen",
-  bookStayMsg: "Hallo Rosario! Ich möchte einen Aufenthalt im {hotel} buchen. Können Sie mir Verfügbarkeit und Preise schicken?",
-  viewJourney: "Reise ansehen",
-  includesStay: "Aufenthalt im Hotel Rosario",
-  whereYouSleep: "Wo Sie schlafen",
-  officeTitle: "Reservierungszentrale der Hotels",
-  follow: "Den Hotels folgen",
-  aboutTitle: "Teil der Grupo Rosario",
-  homeTitle: "Die Reise und das Bett, aus einer Familie.",
-  homeCta: "Hotels & Aufenthalte entdecken",
-};
-const zh: StaysDict = {
-  ...en,
-  nav: "酒店与住宿",
-  eyebrow: "Hoteles Rosario · 我们的姊妹公司",
-  title: "与我们同行，与我们同住。",
-  groupLine: "Grupo Rosario 旗下公司",
-  hotelsTitle: "我们的酒店",
-  combosEyebrow: "行程 + 住宿",
-  combosTitle: "入住 Hotel Rosario 的行程",
-  nights: "{n} 晚",
-  night: "1 晚",
-  stars: "{n} 星级",
-  call: "致电酒店",
-  website: "官方网站",
-  bookStay: "预订此酒店",
-  bookStayMsg: "您好 Rosario！我想预订 {hotel} 的住宿，请发给我空房和价格。",
-  viewJourney: "查看行程",
-  includesStay: "入住 Hotel Rosario",
-  whereYouSleep: "您的住宿",
-  officeTitle: "酒店预订中心",
-  follow: "关注酒店",
-  aboutTitle: "Grupo Rosario 成员",
-  homeTitle: "旅程与床榻，同出一家。",
-  homeCta: "探索酒店与住宿",
-};
+/** Read a stay request back from its WhatsApp message: the #RS-… line, plus the 👤 ✉️ 📱 📝 lines. */
+export function parseStayMessage(text: string): ParsedStay | null {
+  const m = text.match(CODE);
+  if (!m) return null;
+  const [, id, hotel, room, rooms, checkIn, checkOut, guests, total, ex] = m;
+  if (!getRoom(hotel, room) || !isIsoDate(checkIn) || !isIsoDate(checkOut)) return null;
+  const line = (icon: string) => {
+    const l = text.split("\n").map((x) => x.trim()).find((x) => x.startsWith(icon));
+    return l ? l.slice(icon.length).replace(/^[\s:·-]+/, "").trim() || undefined : undefined;
+  };
+  return {
+    id,
+    hotel,
+    room,
+    rooms: +rooms,
+    checkIn,
+    checkOut,
+    guests: +guests,
+    total: +total,
+    extras: (ex ?? "")
+      .split(",")
+      .filter(Boolean)
+      .map((p) => {
+        const k = p.lastIndexOf("x");
+        return { id: p.slice(0, k), qty: +p.slice(k + 1) || 1 };
+      }),
+    name: line("👤"),
+    email: text.match(/[^\s@<>()]+@[^\s@<>()]+\.[a-z]{2,}/i)?.[0],
+    phone: line("📱"),
+    notes: line("📝"),
+  };
+}
 
-const dicts: Record<Locale, StaysDict> = { en, es, pt, fr, de, zh };
-export const staysText = (lang: Locale) => dicts[lang] ?? en;
+export { staysText } from "./i18n/stays";

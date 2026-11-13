@@ -12,7 +12,8 @@ const fail = (e: unknown) => {
 export async function GET() {
   if (!store.sharedEnabled()) return Response.json({ shared: false });
   try {
-    return Response.json({ shared: true, ...(await store.getConfig()) });
+    const [config, occupancy] = await Promise.all([store.getConfig(), store.getOccupancy()]);
+    return Response.json({ shared: true, ...config, occupancy });
   } catch (e) {
     return fail(e);
   }
@@ -30,6 +31,7 @@ export async function POST(req: Request) {
       case "createLead": await store.createLead(body.data); break;
       case "saveConversation": await store.saveConversation(body.data); break;
       case "subscribe": await store.subscribe(body.data); break;
+      case "createStay": await store.createStay(body.data); break;
       default: return Response.json({ ok: false, error: "unknown operation" }, { status: 400 });
     }
     return Response.json({ ok: true });

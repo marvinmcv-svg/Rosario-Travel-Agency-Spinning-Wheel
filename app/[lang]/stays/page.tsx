@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Check, MapPin, Phone } from "lucide-react";
+import { ArrowUpRight, Check, MapPin, MessageCircle, Phone } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { FadeUp, ImageReveal, SplitReveal } from "@/components/motion";
 import { RosarioMark } from "@/components/brand";
+import StayBooker from "@/components/StayBooker";
 import { Stars, StayJourneyCard, stayShare } from "@/components/stays";
 import { GROUP, hotels, staysText } from "@/lib/hotels";
 import { waLink } from "@/lib/contact";
@@ -44,9 +45,14 @@ export default async function StaysPage({ params }: PageProps<"/[lang]/stays">) 
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       <PageHero image="/images/hotels/titicaca-hotel.webp" eyebrow={S.eyebrow} title={S.title} height="h-[86svh]">
-        <div className="flex items-center gap-4 text-salt/80">
-          <RosarioMark className="h-9 w-auto" />
-          <span className="eyebrow">{S.groupLine}</span>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-4 text-salt/80">
+          <a href="#book" className="inline-flex items-center gap-2 rounded-full bg-salt px-6 py-3.5 text-sm font-medium text-ink transition hover:bg-copper" data-testid="hero-book">
+            {S.book.eyebrow} <ArrowUpRight className="h-4 w-4" />
+          </a>
+          <span className="flex items-center gap-3">
+            <RosarioMark className="h-8 w-auto" />
+            <span className="eyebrow">{S.groupLine}</span>
+          </span>
         </div>
       </PageHero>
 
@@ -117,12 +123,20 @@ export default async function StaysPage({ params }: PageProps<"/[lang]/stays">) 
                   </div>
                   <div className="mt-8 flex flex-wrap gap-3">
                     <a
+                      href={`#book-${h.slug}`}
+                      className="inline-flex items-center gap-2 rounded-full bg-salt px-5 py-3 text-sm font-medium text-ink transition hover:bg-copper"
+                      data-testid="hotel-book"
+                    >
+                      {S.bookStay} <ArrowUpRight className="h-4 w-4" />
+                    </a>
+                    <a
                       href={waLink(fmt(S.bookStayMsg, { hotel: h.name }))}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-salt px-5 py-3 text-sm font-medium text-ink transition hover:bg-copper"
+                      aria-label={`WhatsApp · ${h.name}`}
+                      className="inline-flex items-center gap-2 rounded-full border border-[#25d366]/50 px-5 py-3 text-sm text-[#25d366] transition hover:bg-[#25d366]/10"
                     >
-                      {S.bookStay} <ArrowUpRight className="h-4 w-4" />
+                      <MessageCircle className="h-4 w-4" /> WhatsApp
                     </a>
                     <a href={h.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-salt/25 px-5 py-3 text-sm transition hover:border-salt">
                       {S.website}
@@ -139,6 +153,11 @@ export default async function StaysPage({ params }: PageProps<"/[lang]/stays">) 
           })}
         </div>
       </section>
+
+      {/* Book a room */}
+      <div className="mx-auto max-w-[1600px] px-5 pt-16 md:px-10">
+        <StayBooker />
+      </div>
 
       {/* Journeys + stays */}
       <section id="combos" className="mx-auto max-w-[1600px] scroll-mt-24 px-5 py-28 md:px-10">

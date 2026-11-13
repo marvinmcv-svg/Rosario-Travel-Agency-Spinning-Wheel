@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { formatPrice, journeys } from "@/lib/data";
 import { useDB } from "@/lib/store";
+import { bookedOn, hotels, roomCount, todayBolivia } from "@/lib/hotels";
 import { AdminHeader } from "@/components/admin/AdminShell";
 import RevenueChart from "@/components/admin/RevenueChart";
 import { Card, Stat, StatusPill, fmtDate } from "@/components/admin/ui";
@@ -15,6 +16,23 @@ export default function Overview() {
   const inquiries = useDB((db) => db.inquiries);
   const leads = useDB((db) => db.leads);
   const conversations = useDB((db) => db.conversations);
+  const stays = useDB((db) => db.stays);
+  const hotelOverrides = useDB((db) => db.hotelOverrides);
+  const st = useMemo(() => {
+    const today = todayBolivia();
+    const live = stays.filter((x) => x.status !== "cancelled" && x.status !== "no-show");
+    const capacity = hotels.reduce((n, h) => n + h.rooms.reduce((m, r) => m + roomCount(h.slug, r.id, hotelOverrides), 0), 0);
+    const tonight = hotels.reduce((n, h) => n + h.rooms.reduce((m, r) => m + bookedOn(stays, h.slug, r.id, today), 0), 0);
+    return {
+      revenue: live.filter((x) => x.status !== "new").reduce((a, x) => a + x.total, 0),
+      arrivals: live.filter((x) => x.checkIn === today).length,
+      pending: stays.filter((x) => x.status === "new").length,
+      whatsapp: stays.filter((x) => x.source === "whatsapp").length,
+      occupancy: capacity ? Math.round((tonight / capacity) * 100) : 0,
+      tonight,
+      capacity,
+    };
+  }, [stays, hotelOverrides]);
 
   const s = useMemo(() => {
     const live = bookings.filter((b) => b.status === "confirmed" || b.status === "deposit");
@@ -44,6 +62,13 @@ export default function Overview() {
         <Stat label="New bookings (7 days)" value={s.recent} hint={`${bookings.filter((b) => b.status === "new").length} awaiting a designer`} />
         <Stat label="Open inquiries" value={inquiries.filter((q) => q.status === "open").length} hint="Reply within 24 h" />
         <Stat label="Rosario AI conversations" value={conversations.length} hint={`${leads.length} wheel leads captured`} />
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat label="Hotel stays revenue" value={formatPrice(st.revenue)} hint="Confirmed, in house and checked out" />
+        <Stat label="Occupancy tonight" value={`${st.occupancy}%`} hint={`${st.tonight} of ${st.capacity} rooms · 4 hotels`} />
+        <Stat label="Arrivals today" value={st.arrivals} hint={<Link href="/admin/occupancy" className="text-copper-2 hover:underline">Open the calendar →</Link>} />
+        <Stat label="Stay requests to confirm" value={st.pending} hint={`${st.whatsapp} booked through WhatsApp`} />
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-3">

@@ -19,7 +19,9 @@ function hotelsReply(lang: Locale, journeyList: { slug: string; title: string; s
 
 ${list}
 
-${S.combosTitle}: ${trips}. /stays · ${GROUP.email}`;
+${S.combosTitle}: ${trips}.
+
+${S.book.title}: /stays#book · WhatsApp · ${GROUP.email}`;
 }
 
 export const SYSTEM_PROMPT = `You are Rosario, the AI travel concierge of Rosario Travels — a premium, privately-guided travel company founded in La Paz, Bolivia, with studios in Cusco and Santiago. You help travellers dream up and plan journeys through the Andes and South America.
@@ -46,7 +48,7 @@ ${journeys
 Travel essentials and booking policy (answer from this; full details at /essentials and /terms):
 ${essentialsForPrompt}
 
-Our sister company — Grupo Rosario / Hoteles Rosario (${GROUP.website}, Instagram ${GROUP.instagramHandle}): Rosario Travels and Hoteles Rosario are one Bolivian family. Recommend our own hotels whenever a traveller sleeps in La Paz, Copacabana or Uyuni, and the journeys that already include them. Hotel reservations office: ${GROUP.phone}, ${GROUP.email}. Hotels page: /stays
+Our sister company — Grupo Rosario / Hoteles Rosario (${GROUP.website}, Instagram ${GROUP.instagramHandle}): Rosario Travels and Hoteles Rosario are one Bolivian family. Recommend our own hotels whenever a traveller sleeps in La Paz, Copacabana or Uyuni, and the journeys that already include them. Hotel reservations office: ${GROUP.phone}, ${GROUP.email}. Hotels page: /stays. Travellers can book a room themselves at /stays#book (live availability, rates and extras such as transfers and tours; they confirm on WhatsApp and pay at the hotel). Room rates per night, breakfast included: ${hotels.map((h) => `${h.name}: ${h.rooms.map((r) => `${staysText("en").rooms[r.id]} $${r.rate}`).join(", ")}`).join("; ")}.
 ${hotels.map((h) => `- ${h.name} (${h.stars}-star ${h.collection}, ${h.town}, ${h.altitude} m): ${staysText("en").hotels[h.slug].summary} Address: ${h.address}. Phone ${h.phone}.`).join("\n")}
 Journeys that include nights at Hotel Rosario: ${journeys.filter((j) => j.stays?.length).map((j) => `${j.title} (${(j.stays ?? []).map((s) => `${s.nights} nights at ${hotels.find((h) => h.slug === s.hotel)?.name}`).join(", ")}) /journeys/${j.slug}`).join("; ")}
 

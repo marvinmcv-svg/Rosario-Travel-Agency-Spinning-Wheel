@@ -19,6 +19,7 @@
 
 import { useSyncExternalStore } from "react";
 import { defaultWheelPrizes, journeys, type WheelPrize } from "./data";
+import { addDaysIso, hotels, todayBolivia, quoteStay, type HotelOverride, type HotelOverrides, type Occupying, type StayLine } from "./hotels";
 import { useI18n } from "@/components/i18n";
 
 export type BookingStatus = "new" | "confirmed" | "deposit" | "cancelled";
@@ -61,6 +62,28 @@ export type WheelLead = {
 export type ChatMessage = { role: "user" | "assistant"; content: string; at: string };
 export type Conversation = { id: string; startedAt: string; messages: ChatMessage[]; mode: "claude" | "offline" };
 
+/* ── Hotel stays (Hoteles Rosario) ── */
+export type StayStatus = "new" | "confirmed" | "checked-in" | "checked-out" | "cancelled" | "no-show";
+export type StaySource = "website" | "whatsapp" | "phone" | "walk-in" | "journey";
+export type StayBooking = {
+  id: string; // RS-XXXXXX
+  createdAt: string;
+  hotel: string;
+  room: string;
+  rooms: number;
+  guests: number;
+  checkIn: string; // YYYY-MM-DD
+  checkOut: string; // YYYY-MM-DD
+  name: string;
+  email: string;
+  phone?: string;
+  notes?: string;
+  extras: StayLine[];
+  total: number; // USD
+  status: StayStatus;
+  source: StaySource;
+};
+
 export type JourneyOverride = { priceFrom?: number; featured?: boolean; published?: boolean; spotsLeft?: number };
 
 export type Settings = {
@@ -68,6 +91,8 @@ export type Settings = {
   aiEnabled: boolean;
   wheelEnabled: boolean;
   announcement: string;
+  /** WhatsApp number (digits, with country code) that receives hotel stay requests. */
+  staysWhatsApp: string;
 };
 
 type DB = {
@@ -77,6 +102,10 @@ type DB = {
   conversations: Conversation[];
   subscribers: { email: string; createdAt: string }[];
   journeyOverrides: Record<string, JourneyOverride>;
+  stays: StayBooking[];
+  hotelOverrides: HotelOverrides;
+  /** Shared mode: other people's stays, without personal data, so visitors see real availability. */
+  occupancy: Occupying[];
   wheelPrizes: WheelPrize[];
   settings: Settings;
   seeded: boolean;
@@ -96,6 +125,7 @@ const defaultSettings: Settings = {
   aiEnabled: true,
   wheelEnabled: true,
   announcement: "Mirror season on the Salar de Uyuni: January – April 2027 departures now open.",
+  staysWhatsApp: "59177165787",
 };
 
 const empty = (): DB => ({
@@ -105,6 +135,9 @@ const empty = (): DB => ({
   conversations: [],
   subscribers: [],
   journeyOverrides: {},
+  stays: [],
+  hotelOverrides: {},
+  occupancy: [],
   wheelPrizes: defaultWheelPrizes,
   settings: defaultSettings,
   seeded: false,
@@ -170,7 +203,53 @@ function seed(db: DB): DB {
       ],
     },
   ];
-  return { ...db, bookings, inquiries, leads, conversations, seeded: true };
+  return { ...db, bookings, inquiries, leads, conversations, stays: seedStays(names), seeded: true };
+}
+
+/* Demo hotel stays around today, so the occupancy calendar has something to show. */
+function seedStays(names: string[][]): StayBooking[] {
+  const today = todayBolivia();
+  const plan: [number, number, number, StayStatus, StaySource, number][] = [
+    // hotel index, starts in (days), nights, status, source, rooms
+    [1, -1, 2, "checked-in", "whatsapp", 2],
+    [0, 0, 2, "confirmed", "website", 1],
+    [2, 1, 3, "confirmed", "journey", 1],
+    [1, 2, 2, "new", "whatsapp", 1],
+    [0, 3, 2, "new", "website", 2],
+    [3, 4, 1, "confirmed", "phone", 1],
+    [2, 6, 2, "new", "website", 1],
+    [1, 8, 2, "confirmed", "journey", 3],
+    [0, 10, 3, "confirmed", "whatsapp", 1],
+    [1, -4, 2, "checked-out", "walk-in", 1],
+    [2, 12, 2, "cancelled", "website", 1],
+  ];
+  return plan.map(([hi, start, nights, status, source, rooms], i) => {
+    const h = hotels[hi];
+    const r = h.rooms[i % h.rooms.length];
+    const checkIn = addDaysIso(today, start);
+    const checkOut = addDaysIso(checkIn, nights);
+    const guests = Math.min(r.guests * rooms, 2 + (i % 2));
+    const extras: StayLine[] = i % 3 === 0 ? [{ id: hi === 1 ? "salar" : "late-checkout", qty: 1 }] : [];
+    const [name, email] = names[(i + 3) % names.length];
+    return {
+      id: `RS-${(2041 + i).toString()}`,
+      createdAt: new Date(Date.now() - (i + 2) * 86400000).toISOString(),
+      hotel: h.slug,
+      room: r.id,
+      rooms,
+      guests,
+      checkIn,
+      checkOut,
+      name,
+      email,
+      phone: `+591 7${String(1000000 + i * 1234567).slice(0, 7)}`,
+      extras,
+      total: quoteStay({ hotel: h.slug, room: r.id, rooms, guests, checkIn, checkOut, extras }).total,
+      status,
+      source,
+      notes: i === 1 ? "Arriving late, around 11 pm." : undefined,
+    };
+  });
 }
 
 /* ── low-level persistence ─────────────────────────────────────── */
@@ -183,11 +262,17 @@ function read(): DB {
   try {
     const raw = window.localStorage.getItem(KEY);
     const parsed = raw ? ({ ...empty(), ...JSON.parse(raw) } as DB) : empty();
+    parsed.settings = { ...defaultSettings, ...parsed.settings };
     if (SHARED) {
       cache = { ...parsed, seeded: true };
     } else {
       cache = parsed.seeded ? parsed : seed(parsed);
       if (!parsed.seeded) write(cache);
+      else if (!raw?.includes('"stays"')) {
+        // Demo data saved before hotel stays existed: add the sample stays once.
+        cache = { ...cache, stays: seedStays([["Claire Dubois", "claire.dubois@example.com"], ["Tomás Rivera", "tomas.rivera@example.com"], ["Aiko Tanaka", "aiko.t@example.com"], ["Daniel Okafor", "d.okafor@example.com"]]) };
+        write(cache);
+      }
     }
   } catch {
     cache = SHARED ? { ...empty(), seeded: true } : seed(empty());
@@ -315,7 +400,14 @@ if (typeof window !== "undefined" && SHARED && !window.location.pathname.startsW
     .then((r) => (r.ok ? r.json() : null))
     .then((d) => {
       if (!d?.shared || role === "admin") return;
-      update((db) => ({ ...db, settings: d.settings, wheelPrizes: d.wheelPrizes, journeyOverrides: d.journeyOverrides }));
+      update((db) => ({
+        ...db,
+        settings: { ...db.settings, ...d.settings },
+        wheelPrizes: d.wheelPrizes,
+        journeyOverrides: d.journeyOverrides,
+        hotelOverrides: d.hotelOverrides ?? {},
+        occupancy: d.occupancy ?? [],
+      }));
     })
     .catch(() => {});
   void flush();
@@ -417,6 +509,38 @@ export const actions = {
     send("subscribe", { email });
   },
 
+  /* ── hotel stays ── */
+  createStay(b: Omit<StayBooking, "id" | "createdAt" | "status"> & { id?: string; status?: StayStatus }) {
+    const stay: StayBooking = { ...b, id: b.id ?? `RS-${rand(6)}`, createdAt: new Date().toISOString(), status: b.status ?? "new" };
+    update((db) => ({ ...db, stays: [stay, ...db.stays.filter((x) => x.id !== stay.id)] }));
+    if (role === "admin") void adminSend("upsertStay", { value: stay });
+    else send("createStay", stay);
+    return stay;
+  },
+  setStayStatus(id: string, status: StayStatus) {
+    update((db) => ({ ...db, stays: db.stays.map((s) => (s.id === id ? { ...s, status } : s)) }));
+    void adminSend("setStayStatus", { id, status });
+  },
+  /** Portal: edit a reservation (dates, room, guests, notes, total…). */
+  updateStay(id: string, patch: Partial<StayBooking>) {
+    let next: StayBooking | undefined;
+    update((db) => ({ ...db, stays: db.stays.map((s) => (s.id === id ? (next = { ...s, ...patch, id: s.id }) : s)) }));
+    if (next) void adminSend("upsertStay", { value: next });
+  },
+  deleteStay(id: string) {
+    update((db) => ({ ...db, stays: db.stays.filter((s) => s.id !== id) }));
+    void adminSend("deleteStay", { id });
+  },
+  setHotelOverride(hotel: string, patch: HotelOverride) {
+    update((db) => {
+      const cur = db.hotelOverrides[hotel] ?? {};
+      const rooms = { ...cur.rooms };
+      for (const [k, v] of Object.entries(patch.rooms ?? {})) rooms[k] = { ...rooms[k], ...v };
+      return { ...db, hotelOverrides: { ...db.hotelOverrides, [hotel]: { ...cur, ...patch, rooms } } };
+    });
+    void adminSend("setHotelOverrides", { value: read().hotelOverrides });
+  },
+
   setJourneyOverride(slug: string, patch: JourneyOverride) {
     update((db) => ({
       ...db,
@@ -441,6 +565,13 @@ export const actions = {
     write(seed(empty()));
   },
 };
+
+/** Everything that holds rooms: this browser's stays plus (shared mode) everyone else's, anonymised. */
+export function useOccupancy(): Occupying[] {
+  const stays = useDB((db) => db.stays);
+  const occupancy = useDB((db) => db.occupancy);
+  return SHARED && role !== "admin" ? [...occupancy.filter((o) => !stays.some((s) => s.id === o.id)), ...stays] : stays;
+}
 
 /** Journeys with admin overrides applied (price, featured, published). */
 export function useJourneys() {

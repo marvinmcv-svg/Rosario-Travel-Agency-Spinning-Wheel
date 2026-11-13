@@ -169,6 +169,52 @@ const zh: ContentOverlay = {
     },
   },
   journeys: {
+    "rosario-altiplano": {
+      title: "Rosario 高原之旅",
+      subtitle: "拉巴斯 · 的的喀喀湖 · 乌尤尼，入住 Hotel Rosario",
+      summary: "由同一个家族全程照顾，畅游玻利维亚三大奇观：在我们的每家酒店各住两晚，从拉巴斯的花园到的的喀喀湖畔，再到盐湖边缘。",
+      itinerary: [
+        { day: "第 1–2 天", title: "拉巴斯", text: "机场迎接，入住 Hotel Boutique Rosario La Paz Sur，海拔较低，第一晚更舒适。乘缆车俯瞰城市，逛女巫市场，并用一天游览蒂瓦纳库。" },
+        { day: "第 3–4 天", title: "科帕卡巴纳与太阳岛", text: "沿湖前往 Hotel Rosario Lago Titicaca。在卡尔瓦里奥山观赏日落，然后乘私人游船前往太阳岛，攀登印加石阶。" },
+        { day: "第 5 天", title: "飞往乌尤尼", text: "返回拉巴斯，短途飞往乌尤尼。入住 Hotel Rosario Uyuni，在 Tambo Colonial 餐厅享用晚餐。" },
+        { day: "第 6 天", title: "乌尤尼盐湖", text: "火车墓地、科尔查尼制盐合作社、仙人掌岛，并在盐湖上观赏日落。回到酒店后观星。" },
+        { day: "第 7 天", title: "告别", text: "在乌尤尼享用早餐，飞往拉巴斯转机回国。" },
+      ],
+      includes: ["入住 Hoteles Rosario 共 6 晚（2 + 2 + 2）", "每日早餐", "私人接送与双语导游", "拉巴斯–乌尤尼往返航班", "前往太阳岛的游船", "乘陆地巡洋舰游览盐湖一整天", "Rosario 全天候礼宾服务"],
+    },
+    "copacabana-escape": {
+      title: "科帕卡巴纳湖畔小憩",
+      subtitle: "3 天 · 入住 Hotel Rosario Lago Titicaca 2 晚",
+      summary: "圣湖之畔的短途度假：在 Hotel Rosario 湖景房住两晚，在卡尔瓦里奥山观赏日落，并在太阳岛度过一天。",
+      itinerary: [
+        { day: "第 1 天", title: "拉巴斯 → 科帕卡巴纳", text: "私人专车穿越高原和蒂基纳海峡。入住湖景房，登上卡尔瓦里奥山观赏日落。" },
+        { day: "第 2 天", title: "太阳岛", text: "乘船前往太阳岛：印加石阶、皮尔科凯纳神庙，在湖上方享用午餐。晚上返回酒店。" },
+        { day: "第 3 天", title: "科帕卡巴纳 → 拉巴斯", text: "在湖景中享用早餐，参观科帕卡巴纳大教堂和芦苇船工匠，然后返回拉巴斯。" },
+      ],
+      includes: ["入住 Hotel Rosario Lago Titicaca 2 晚", "每日早餐", "拉巴斯出发的私人接送", "前往太阳岛的游船", "当地导游"],
+    },
+    "uyuni-salt-and-stars": {
+      title: "盐与星空",
+      subtitle: "3 天 · 入住 Hotel Rosario Uyuni 2 晚",
+      summary: "舒适地游览盐湖：乘陆地巡洋舰在盐湖上度过一整天，观赏日落与星空，并在我们乌尤尼的太阳能生态酒店温暖地住上两晚。",
+      itinerary: [
+        { day: "第 1 天", title: "乌尤尼", text: "抵达并入住 Hotel Rosario Uyuni。黄金时刻游览火车墓地，在 Tambo Colonial 享用晚餐。" },
+        { day: "第 2 天", title: "乌尤尼盐湖", text: "科尔查尼制盐合作社、达喀尔拉力赛纪念碑、长满巨型仙人掌的仙人掌岛、错位照片，以及盐湖上的日落与星空。" },
+        { day: "第 3 天", title: "继续旅程", text: "在酒店享用早餐后送往机场，或继续南下前往利佩斯的高原湖泊。" },
+      ],
+      includes: ["入住 Hotel Rosario Uyuni 2 晚", "每日早餐及一次晚餐", "司机兼导游陪同游览盐湖一整天", "乌尤尼机场接送"],
+    },
+    "la-paz-heights": {
+      title: "从高处看拉巴斯",
+      subtitle: "3 天 · 入住 Hotel Rosario La Paz 2 晚",
+      summary: "从缆车、市场和有 1500 年历史的邻居蒂瓦纳库，认识世界上海拔最高的政府所在地，并入住 Hotel Boutique Rosario La Paz Sur 两晚。",
+      itinerary: [
+        { day: "第 1 天", title: "欢迎来到拉巴斯", text: "机场迎接，入住 Rosario La Paz Sur，下午悠闲游览月亮谷。" },
+        { day: "第 2 天", title: "乘缆车看城市", text: "乘坐红线、黄线和银线缆车俯瞰城市，游览女巫市场和圣弗朗西斯科教堂，在当地市场享用午餐。" },
+        { day: "第 3 天", title: "蒂瓦纳库", text: "与考古学家一同参观太阳门和阿卡帕纳金字塔，然后搭乘航班或前往的的喀喀湖。" },
+      ],
+      includes: ["入住 Hotel Boutique Rosario La Paz Sur 2 晚", "每日早餐", "机场接送", "缆车通票及城市导游", "蒂瓦纳库门票及导游"],
+    },
     "andean-odyssey": {
       title: "安第斯奥德赛",
       subtitle: "乌尤尼 · 的的喀喀湖 · 马丘比丘",

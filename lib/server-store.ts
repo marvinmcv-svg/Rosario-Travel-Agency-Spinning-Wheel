@@ -11,7 +11,8 @@
    ────────────────────────────────────────────────────────────── */
 
 import { defaultWheelPrizes, journeys, type WheelPrize } from "./data";
-import type { Booking, Conversation, Inquiry, JourneyOverride, Settings, WheelLead } from "./store";
+import type { Booking, Conversation, Inquiry, JourneyOverride, Settings, StayBooking, WheelLead } from "./store";
+import { availability, extras as allExtras, getHotel, getRoom, isIsoDate, nightsBetween, quoteStay, todayBolivia, type HotelOverrides, type Occupying } from "./hotels";
 
 const url = () => process.env.SUPABASE_URL?.replace(/\/$/, "");
 const key = () => process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -24,6 +25,7 @@ export const defaultSettings: Settings = {
   aiEnabled: true,
   wheelEnabled: true,
   announcement: "Mirror season on the Salar de Uyuni: January – April 2027 departures now open.",
+  staysWhatsApp: "59177165787",
 };
 
 export class StoreError extends Error {
@@ -66,6 +68,17 @@ const toLead = (r: LeadRow): WheelLead => ({ id: r.id, createdAt: r.created_at, 
 type ConvRow = { id: string; started_at: string; mode: Conversation["mode"]; messages: Conversation["messages"] };
 const toConv = (r: ConvRow): Conversation => ({ id: r.id, startedAt: r.started_at, mode: r.mode, messages: r.messages });
 
+type StayRow = {
+  id: string; created_at: string; hotel: string; room: string; rooms: number; guests: number; check_in: string; check_out: string;
+  name: string; email: string; phone: string | null; notes: string | null; extras: StayBooking["extras"]; total: number | string;
+  status: StayBooking["status"]; source: StayBooking["source"];
+};
+const toStay = (r: StayRow): StayBooking => ({
+  id: r.id, createdAt: r.created_at, hotel: r.hotel, room: r.room, rooms: r.rooms, guests: r.guests, checkIn: r.check_in, checkOut: r.check_out,
+  name: r.name, email: r.email, phone: r.phone ?? undefined, notes: r.notes ?? undefined, extras: r.extras ?? [], total: Number(r.total),
+  status: r.status, source: r.source,
+});
+
 /* ── validation helpers ────────────────────────────────────────── */
 const str = (v: unknown, max: number, required = true): string | undefined => {
   if (typeof v !== "string" || !v.trim()) {
@@ -85,7 +98,7 @@ const idOf = (v: unknown, prefix: string) => {
 };
 
 /* ── config (settings, prizes, journey overrides) ──────────────── */
-export type PublicConfig = { settings: Settings; wheelPrizes: WheelPrize[]; journeyOverrides: Record<string, JourneyOverride> };
+export type PublicConfig = { settings: Settings; wheelPrizes: WheelPrize[]; journeyOverrides: Record<string, JourneyOverride>; hotelOverrides: HotelOverrides };
 
 export async function getConfig(): Promise<PublicConfig> {
   const rows = await rest<{ key: string; value: unknown }[]>("site_config?select=key,value");
@@ -94,6 +107,7 @@ export async function getConfig(): Promise<PublicConfig> {
     settings: { ...defaultSettings, ...get<Partial<Settings>>("settings") },
     wheelPrizes: get<WheelPrize[]>("wheel_prizes") ?? defaultWheelPrizes,
     journeyOverrides: get<Record<string, JourneyOverride>>("journey_overrides") ?? {},
+    hotelOverrides: get<HotelOverrides>("hotel_overrides") ?? {},
   };
 }
 
@@ -209,15 +223,91 @@ export async function subscribe(input: { email?: unknown }) {
   });
 }
 
+/* ── hotel stays ──────────────────────────────────────────────── */
+
+/** Rooms held from today on, without personal data: the website uses it to show real availability. */
+export async function getOccupancy(): Promise<Occupying[]> {
+  const rows = await rest<Occupying & { check_in: string; check_out: string }[]>(
+    `stay_bookings?select=id,hotel,room,rooms,check_in,check_out,status&check_out=gt.${todayBolivia()}&status=not.in.(cancelled,no-show)&limit=5000`,
+  );
+  return (rows as unknown as { id: string; hotel: string; room: string; rooms: number; check_in: string; check_out: string; status: string }[]).map((r) => ({
+    id: r.id, hotel: r.hotel, room: r.room, rooms: r.rooms, checkIn: r.check_in, checkOut: r.check_out, status: r.status,
+  }));
+}
+
+const STAY_STATUSES = ["new", "confirmed", "checked-in", "checked-out", "cancelled", "no-show"];
+const STAY_SOURCES = ["website", "whatsapp", "phone", "walk-in", "journey"];
+
+/** Validate a stay and price it from the rates (with portal overrides), never from the browser. */
+async function cleanStay(input: Partial<StayBooking>, opts: { admin: boolean }) {
+  const hotel = getHotel(String(input.hotel));
+  if (!hotel) throw new StoreError("unknown hotel", 400);
+  const room = getRoom(hotel.slug, String(input.room));
+  if (!room) throw new StoreError("unknown room", 400);
+  if (!isIsoDate(input.checkIn) || !isIsoDate(input.checkOut)) throw new StoreError("invalid dates", 400);
+  const nights = nightsBetween(input.checkIn, input.checkOut);
+  if (!(nights >= 1 && nights <= 60)) throw new StoreError("invalid dates", 400);
+  if (!opts.admin && input.checkIn < todayBolivia()) throw new StoreError("check-in in the past", 400);
+  const rooms = Math.round(Number(input.rooms));
+  const guests = Math.round(Number(input.guests));
+  if (!(rooms >= 1 && rooms <= 10)) throw new StoreError("invalid rooms", 400);
+  if (!(guests >= 1 && guests <= room.guests * rooms)) throw new StoreError("too many guests for the rooms", 400);
+  const extras = (Array.isArray(input.extras) ? input.extras : [])
+    .filter((e) => allExtras.some((x) => x.id === e?.id && x.hotels.includes(hotel.slug)))
+    .map((e) => ({ id: String(e.id), qty: Math.min(20, Math.max(1, Math.round(Number(e.qty) || 1))) }))
+    .slice(0, 12);
+  const { hotelOverrides } = await getConfig();
+  const priced = quoteStay({ hotel: hotel.slug, room: room.id, rooms, guests, checkIn: input.checkIn, checkOut: input.checkOut, extras }, hotelOverrides).total;
+  // The team may set any price (discounts, packages); the website always gets list price.
+  const total = opts.admin && Number.isFinite(Number(input.total)) && Number(input.total) >= 0 ? Number(input.total) : priced;
+  return { hotel, room, rooms, guests, nights, extras, total, hotelOverrides, checkIn: input.checkIn, checkOut: input.checkOut };
+}
+
+export async function createStay(input: Partial<StayBooking>) {
+  const c = await cleanStay(input, { admin: false });
+  const free = availability(await getOccupancy(), c.hotel.slug, c.checkIn, c.checkOut, c.hotelOverrides)[c.room.id] ?? 0;
+  // Over capacity: still saved so the request is not lost, flagged for the team.
+  const notes = [str(input.notes, 3000, false), free < c.rooms ? "⚠ Not enough rooms free when requested: check the calendar." : undefined].filter(Boolean).join("\n") || null;
+  await rest("stay_bookings", {
+    method: "POST",
+    prefer: "resolution=ignore-duplicates,return=minimal",
+    body: JSON.stringify({
+      id: idOf(input.id, "RS"),
+      hotel: c.hotel.slug, room: c.room.id, rooms: c.rooms, guests: c.guests, check_in: c.checkIn, check_out: c.checkOut,
+      name: str(input.name, 200), email: email(input.email), phone: str(input.phone, 60, false) ?? null, notes,
+      extras: c.extras, total: c.total, status: "new",
+      source: input.source === "whatsapp" ? "whatsapp" : "website",
+    }),
+  });
+}
+
+async function upsertStay(input: Partial<StayBooking>) {
+  const c = await cleanStay(input, { admin: true });
+  const status = STAY_STATUSES.includes(String(input.status)) ? input.status : "new";
+  const source = STAY_SOURCES.includes(String(input.source)) ? input.source : "phone";
+  await rest("stay_bookings?on_conflict=id", {
+    method: "POST",
+    prefer: "resolution=merge-duplicates,return=minimal",
+    body: JSON.stringify({
+      id: idOf(input.id, "RS"),
+      created_at: typeof input.createdAt === "string" ? input.createdAt : new Date().toISOString(),
+      hotel: c.hotel.slug, room: c.room.id, rooms: c.rooms, guests: c.guests, check_in: c.checkIn, check_out: c.checkOut,
+      name: str(input.name, 200), email: email(input.email), phone: str(input.phone, 60, false) ?? null, notes: str(input.notes, 4000, false) ?? null,
+      extras: c.extras, total: c.total, status, source,
+    }),
+  });
+}
+
 /* ── team portal (passcode-gated in the route) ─────────────────── */
 export async function loadAll() {
-  const [bookings, inquiries, leads, conversations, subscribers, config] = await Promise.all([
+  const [bookings, inquiries, leads, conversations, subscribers, config, stays] = await Promise.all([
     rest<BookingRow[]>("bookings?select=*&order=created_at.desc&limit=2000"),
     rest<InquiryRow[]>("inquiries?select=*&order=created_at.desc&limit=2000"),
     rest<LeadRow[]>("wheel_leads?select=*&order=created_at.desc&limit=5000"),
     rest<ConvRow[]>("conversations?select=id,started_at,mode,messages&order=started_at.desc&limit=300"),
     rest<{ email: string; created_at: string }[]>("subscribers?select=*&order=created_at.desc&limit=10000"),
     getConfig(),
+    rest<StayRow[]>("stay_bookings?select=*&order=check_in.desc&limit=5000"),
   ]);
   return {
     bookings: bookings.map(toBooking),
@@ -225,6 +315,7 @@ export async function loadAll() {
     leads: leads.map(toLead),
     conversations: conversations.map(toConv),
     subscribers: subscribers.map((s) => ({ email: s.email, createdAt: s.created_at })),
+    stays: stays.map(toStay),
     ...config,
   };
 }
@@ -250,6 +341,16 @@ export async function adminOp(op: string, a: Record<string, unknown>) {
     case "setWheelPrizes":
       if (!Array.isArray(a.value) || a.value.length < 3 || a.value.length > 12) throw new StoreError("invalid prizes", 400);
       return setConfig("wheel_prizes", a.value);
+    case "upsertStay":
+      return upsertStay((a.value ?? {}) as Partial<StayBooking>);
+    case "setStayStatus":
+      if (!STAY_STATUSES.includes(String(a.status))) throw new StoreError("invalid status", 400);
+      return rest(`stay_bookings?id=eq.${enc(String(a.id))}`, { method: "PATCH", prefer: "return=minimal", body: JSON.stringify({ status: a.status }) });
+    case "deleteStay":
+      return rest(`stay_bookings?id=eq.${enc(String(a.id))}`, { method: "DELETE", prefer: "return=minimal" });
+    case "setHotelOverrides":
+      if (typeof a.value !== "object" || !a.value) throw new StoreError("invalid hotel settings", 400);
+      return setConfig("hotel_overrides", a.value);
     case "setSettings":
       return setConfig("settings", { ...defaultSettings, ...(a.value as object) });
     default:

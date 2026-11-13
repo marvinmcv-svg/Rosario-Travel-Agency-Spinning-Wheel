@@ -325,6 +325,95 @@ for (const vp of VIEWPORTS) {
     assert(/Escapada al Lago/.test(await page.locator("h1").textContent()), "journey not Spanish");
     assert(/Dónde dormirás/.test(await page.locator('[data-testid="where-you-sleep"]').textContent()), "where you sleep not Spanish");
   });
+  await check("Portuguese, French, German, Chinese: the new trips and hotel booking are translated", async () => {
+    for (const [l, title] of [["pt", "O Altiplano Rosario"], ["fr", "L'Altiplano Rosario"], ["de", "Das Rosario-Altiplano"], ["zh", "Rosario 高原之旅"]]) {
+      await page.goto(`${BASE}/${l}/journeys/rosario-altiplano`, { waitUntil: "load" });
+      const h1 = (await page.locator("h1").textContent()).trim();
+      assert(h1.includes(title), `${l}: title was "${h1}"`);
+    }
+    await page.goto(BASE + "/fr/stays", { waitUntil: "load" });
+    assert(/Réservez votre chambre/.test(await page.locator('[data-testid="stay-booker"]').textContent()), "French booker not translated");
+  });
+
+  /* ── 4. Hotel room booking + WhatsApp ordering ─────────────── */
+  current = `${vp.name} hotel booking`;
+  let waMessage = "";
+  await check("book a room: hotel from link, live price, extras, WhatsApp hand-off", async () => {
+    await ctx.route(/https:\/\/(wa\.me|api\.whatsapp\.com)\//, (r) => r.fulfill({ status: 200, contentType: "text/html", body: "<title>WhatsApp</title>" }));
+    await page.goto(BASE + "/stays#book-rosario-uyuni", { waitUntil: "load" });
+    await page.waitForTimeout(1200);
+    assert((await page.locator('[data-testid="pick-rosario-uyuni"]').getAttribute("aria-checked")) === "true", "#book-rosario-uyuni did not pick Uyuni");
+    // 2 guests: the single room is too small, so the king room is chosen (2 nights × $110)
+    assert((await page.locator('[data-testid="room-uy-king"]').getAttribute("aria-checked")) === "true", "king room not selected");
+    assert(await page.locator('[data-testid="room-uy-single"]').isDisabled(), "single room should be too small for 2 guests");
+    const sum = page.locator('[data-testid="stay-summary"]');
+    assert(/\$220/.test(await sum.textContent()), `room total wrong: ${await sum.textContent()}`);
+    await page.locator('[data-testid="extra-salar"]').check();
+    assert(/\$340/.test(await sum.textContent()), "extras not added to the total (220 + 2 × 60)");
+    const b = page.locator('[data-testid="stay-booker"]');
+    await b.getByPlaceholder("Full name").fill("E2E Guest");
+    await b.getByPlaceholder("Email", { exact: true }).fill("guest@example.com");
+    await b.getByPlaceholder("WhatsApp number").fill("71234567");
+    await b.getByPlaceholder("Requests (arrival time, celebrations…)").fill("Late arrival");
+    const [popup] = await Promise.all([ctx.waitForEvent("page"), page.locator('[data-testid="stay-book-wa"]').click()]);
+    const url = decodeURIComponent(popup.url());
+    await popup.close();
+    assert(url.includes("wa.me/59177165787") || url.includes("59177165787"), `WhatsApp went to ${url.slice(0, 60)}`);
+    assert(/#RS-[A-Z0-9]+ rosario-uyuni\/uy-kingx1 \d{4}-\d{2}-\d{2}>\d{4}-\d{2}-\d{2} 2p \$340 \+salarx1/.test(url), "booking code line missing from the WhatsApp message");
+    await page.locator('[data-testid="stay-done"]').waitFor();
+    waMessage = await page.locator('[data-testid="stay-message"]').innerText();
+    assert(/E2E Guest/.test(waMessage) && /guest@example\.com/.test(waMessage), "guest details missing from the message");
+    await page.screenshot({ path: join(OUT, `${vp.name}-stay-done.png`) });
+  });
+  await check("book a room: impossible stays are blocked", async () => {
+    await page.goto(BASE + "/stays#book-rosario-la-paz-centro", { waitUntil: "load" });
+    await page.waitForTimeout(800);
+    const b = page.locator('[data-testid="stay-booker"]');
+    for (let i = 0; i < 2; i++) await b.getByRole("button", { name: "Guests +" }).click(); // 4 guests, 1 room
+    assert(await page.locator('[data-testid="room-ce-double"]').isDisabled(), "a double room accepted 4 guests");
+    assert(await page.locator('[data-testid="stay-book-wa"]').isDisabled(), "booking allowed with no room that fits");
+    await page.locator('[data-testid="check-out"]').fill(await page.locator('[data-testid="check-in"]').inputValue());
+    assert(/after check-in/.test(await b.textContent()), "same-day check-out not flagged");
+  });
+
+  /* ── 5. Team portal: hotel stays ───────────────────────────── */
+  current = `${vp.name} portal`;
+  await check("portal: sign in, the website's stay request is listed", async () => {
+    await page.goto(BASE + "/admin/stays", { waitUntil: "load" });
+    await page.locator('input[type="password"]').fill("rosario");
+    await page.getByRole("button", { name: "Enter" }).click();
+    await page.locator('[data-testid="stays-table"]').waitFor({ timeout: 8000 });
+    assert((await page.locator('[data-testid="stays-table"]').getByText("E2E Guest").count()) >= 1, "website booking missing from the portal");
+    await page.screenshot({ path: join(OUT, `${vp.name}-admin-stays.png`) });
+  });
+  await check("portal: import a booking from its WhatsApp message", async () => {
+    page.once("dialog", (d) => d.accept()); // "already in the portal: replace?"
+    await page.locator('[data-testid="open-import"]').click();
+    await page.locator('[data-testid="import-text"]').fill(waMessage.replace("E2E Guest", "E2E Guest Imported"));
+    await page.locator('[data-testid="import-read"]').click();
+    await page.locator('[data-testid="stay-save"]').click();
+    await page.getByText("E2E Guest Imported").first().waitFor({ timeout: 4000 });
+  });
+  await check("portal: message the guest on WhatsApp from the reservation", async () => {
+    await page.getByText("E2E Guest Imported").first().click();
+    const href = decodeURIComponent((await page.locator('[data-testid="wa-confirm"]').getAttribute("href")) || "");
+    assert(href.includes("wa.me/59171234567"), `guest link went to ${href.slice(0, 40)} (Bolivian number should get +591)`);
+    assert(/confirmada|confirmed/.test(href), "confirmation text missing");
+    await page.screenshot({ path: join(OUT, `${vp.name}-admin-drawer.png`) });
+    await page.keyboard.press("Escape");
+  });
+  await check("portal: occupancy calendar and rates", async () => {
+    await page.goto(BASE + "/admin/occupancy", { waitUntil: "load" });
+    await page.locator('[data-testid="occupancy-grid"]').waitFor();
+    await page.goto(BASE + "/admin/hotels", { waitUntil: "load" });
+    const rate = page.locator('[data-testid="rate-tt-premium"]');
+    await rate.fill("120");
+    await rate.blur();
+    await page.goto(BASE + "/stays#book-rosario-lago-titicaca", { waitUntil: "load" });
+    await page.waitForTimeout(800);
+    assert(/\$120/.test(await page.locator('[data-testid="room-tt-premium"]').textContent()), "new rate not shown on the website");
+  });
+
   if (vp === VIEWPORTS[0]) await check("Rosario AI knows our hotels", async () => {
     const r = await page.request.post(BASE + "/api/chat", { data: { messages: [{ role: "user", content: "Which hotel do you recommend in Uyuni?" }], lang: "en" } });
     assert(r.ok(), `chat HTTP ${r.status()}`);

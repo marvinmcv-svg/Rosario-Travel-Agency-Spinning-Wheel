@@ -10,7 +10,7 @@
    ────────────────────────────────────────────────────────────── */
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { BedDouble, Check, MessageCircle, Minus, Plus, Users } from "lucide-react";
 import { useI18n, Price } from "./i18n";
 import { useLenis } from "./SmoothScroll";
@@ -23,16 +23,16 @@ import { fmtStayDate, nightsText, stayRequestText, waTo } from "@/lib/stay-messa
 
 const WA_GREEN = "#25d366";
 
-function Stepper({ value, set, min, max, label }: { value: number; set: (n: number) => void; min: number; max: number; label: string }) {
+function Stepper({ value, set, min, max, label }: { value: number; set: Dispatch<SetStateAction<number>>; min: number; max: number; label: string }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl border border-line px-3 py-2">
       <span className="text-sm text-salt/65">{label}</span>
       <div className="flex items-center gap-3">
-        <button type="button" onClick={() => set(Math.max(min, value - 1))} disabled={value <= min} aria-label={`${label} −`} className="flex h-8 w-8 items-center justify-center rounded-full border border-salt/20 disabled:opacity-30 hover:border-salt">
+        <button type="button" onClick={() => set((v) => Math.max(min, v - 1))} disabled={value <= min} aria-label={`${label} −`} className="flex h-8 w-8 items-center justify-center rounded-full border border-salt/20 disabled:opacity-30 hover:border-salt">
           <Minus className="h-3.5 w-3.5" />
         </button>
         <span className="w-5 text-center font-display text-xl tabular-nums" data-testid={`stepper-${label}`}>{value}</span>
-        <button type="button" onClick={() => set(Math.min(max, value + 1))} disabled={value >= max} aria-label={`${label} +`} className="flex h-8 w-8 items-center justify-center rounded-full border border-salt/20 disabled:opacity-30 hover:border-salt">
+        <button type="button" onClick={() => set((v) => Math.min(max, v + 1))} disabled={value >= max} aria-label={`${label} +`} className="flex h-8 w-8 items-center justify-center rounded-full border border-salt/20 disabled:opacity-30 hover:border-salt">
           <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
